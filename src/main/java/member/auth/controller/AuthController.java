@@ -41,10 +41,9 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<LogoutResponse> logout(
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody(required = false) LogoutRequest request) {
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
-        authService.logout(authHeader, request);
+        authService.logout(authHeader);
         return ResponseEntity.ok(new LogoutResponse("로그아웃 되었습니다."));
     }
 }

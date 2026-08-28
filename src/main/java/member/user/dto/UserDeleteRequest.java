@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// DELETE /api/users/me 요청 바디
+
 @Getter
 @NoArgsConstructor
 public class UserDeleteRequest {
