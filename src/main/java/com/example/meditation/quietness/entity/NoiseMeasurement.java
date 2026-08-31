@@ -50,6 +50,20 @@ public class NoiseMeasurement {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    public NoiseMeasurement(
+            NoiseDevice device,
+            Long guesthouseId,
+            Long spaceId,
+            BigDecimal decibel,
+            LocalDateTime measuredAt
+    ) {
+        this.device = device;
+        this.guesthouseId = guesthouseId;
+        this.spaceId = spaceId;
+        this.decibel = decibel;
+        this.measuredAt = measuredAt;
+    }
+
     @PrePersist
     private void onCreate() {
         createdAt = LocalDateTime.now();

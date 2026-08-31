@@ -2,6 +2,8 @@ package com.example.meditation.quietness.repository;
 
 import com.example.meditation.quietness.entity.NoiseMeasurement;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,5 +16,21 @@ public interface NoiseMeasurementRepository extends JpaRepository<NoiseMeasureme
             Long spaceId,
             LocalDateTime from,
             LocalDateTime to
+    );
+
+    @Query("""
+            select measurement
+            from NoiseMeasurement measurement
+            where measurement.guesthouseId = :guesthouseId
+              and measurement.measuredAt = (
+                  select max(candidate.measuredAt)
+                  from NoiseMeasurement candidate
+                  where candidate.guesthouseId = measurement.guesthouseId
+                    and candidate.spaceId = measurement.spaceId
+              )
+            order by measurement.spaceId asc
+            """)
+    List<NoiseMeasurement> findLatestForEachSpaceByGuesthouseId(
+            @Param("guesthouseId") Long guesthouseId
     );
 }

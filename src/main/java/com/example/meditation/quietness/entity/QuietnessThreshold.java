@@ -52,6 +52,20 @@ public class QuietnessThreshold {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    public QuietnessThreshold(
+            Long guesthouseId,
+            QuietnessLevel level,
+            BigDecimal minDecibel,
+            BigDecimal maxDecibel,
+            Integer displayOrder
+    ) {
+        this.guesthouseId = guesthouseId;
+        this.level = level;
+        this.minDecibel = minDecibel;
+        this.maxDecibel = maxDecibel;
+        this.displayOrder = displayOrder;
+    }
+
     public boolean includes(BigDecimal value) {
         boolean aboveMinimum = minDecibel == null || value.compareTo(minDecibel) >= 0;
         boolean belowMaximum = maxDecibel == null || value.compareTo(maxDecibel) <= 0;

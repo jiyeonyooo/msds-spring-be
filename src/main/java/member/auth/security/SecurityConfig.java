@@ -3,6 +3,7 @@ package member.auth.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -55,7 +56,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/wellness/questions", "/api/wellness/guest/**").permitAll()
                         .requestMatchers("/api/rooms", "/api/rooms/**", "/api/facilities", "/api/facilities/**").permitAll()
-                        .requestMatchers("/api/quietness/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/quietness/guesthouses/*/summary",
+                                "/api/quietness/guesthouses/*/spaces",
+                                "/api/quietness/guesthouses/*/spaces/*",
+                                "/api/quietness/spaces/*/history"
+                        ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
