@@ -1,8 +1,8 @@
-package Room.controller;
+package room.controller;
 
-import Room.dto.response.RoomAvailabilityResponse;
-import Room.dto.response.RoomDetailResponse;
-import Room.dto.response.RoomSummaryResponse;
+import room.dto.response.RoomAvailabilityResponse;
+import room.dto.response.RoomDetailResponse;
+import room.dto.response.RoomSummaryResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
