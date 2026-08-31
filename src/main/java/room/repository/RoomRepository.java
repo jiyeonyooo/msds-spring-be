@@ -14,6 +14,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "equipmentMappings",
             "equipmentMappings.equipment"
     })
-    @Query("select r from room r where r.id = :roomId")
+    @Query("select r from Room r where r.id = :roomId")
     Optional<Room> findDetailById(@Param("roomId") Long roomId);
 }

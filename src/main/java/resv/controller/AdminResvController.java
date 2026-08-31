@@ -1,41 +1,39 @@
 package resv.controller;
 
-import org.springframework.http.HttpStatus;
+import global.dto.response.ApiResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import resv.enums.ResvStatus;
-
-import java.time.LocalDate;
+import resv.dto.AdminResvSearchRequestDTO;
+import resv.dto.ResvCancelResponseDTO;
+import resv.dto.ResvDetailResponseDTO;
+import resv.dto.ResvListResponseDTO;
+import resv.service.ResvService;
 
 @RestController
 @RequestMapping("/api/admin/resv")
+@Validated
+@RequiredArgsConstructor
 public class AdminResvController {
-    //GET api/admin/resv: 관리자 전체 예약 조회/검색/필터
+    private final ResvService resvService;
+
     @GetMapping
-    public ResponseEntity getAdminResv(
-            @RequestParam(required = false) ResvStatus resvStatus,
-            @RequestParam(required = false) LocalDate searchFromDate,
-            @RequestParam(required = false) LocalDate searchToDate,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "0") int pageNum,
-            @RequestParam(defaultValue = "10") int pageSize) {
-        System.out.println("GET api/admin/resv: 관리자 전체 예약 조회/검색/필터 API 실행");
-        return ResponseEntity.status(HttpStatus.OK).body("");
+    public ResponseEntity<ApiResponse<ResvListResponseDTO>> getReservations(@Valid @ModelAttribute AdminResvSearchRequestDTO request) {
+        return ResponseEntity.ok(ApiResponse.success("요청이 성공적으로 처리되었습니다.", resvService.getAdminReservations(request)));
     }
 
-    //GET api/admin/resv/{resvId}: 관리자 예약 상세 조회
     @GetMapping("/{resvId}")
-    public ResponseEntity getAdminResvDetail(
-            @PathVariable long resvId) {
-        System.out.println("GET api/admin/resv/{resvId}: 관리자 예약 상세 조회 API 실행");
-        return ResponseEntity.status(HttpStatus.OK).body("");
+    public ResponseEntity<ApiResponse<ResvDetailResponseDTO>> getReservation(
+            @PathVariable @Positive(message = "예약 ID는 1 이상의 값이어야 합니다.") long resvId) {
+        return ResponseEntity.ok(ApiResponse.success("요청이 성공적으로 처리되었습니다.", resvService.getAdminReservation(resvId)));
     }
 
-    //PATCH api/admin/resv/{resvId}/status: 관리자 예약 상태 변경
-    @PatchMapping("/{resvId}")
-    public ResponseEntity patchAdminResv(
-            @PathVariable long resvId) {
-        System.out.println("PATCH api/admin/resv/{resvId}/status: 관리자 예약 상태 변경 API 실행");
-        return ResponseEntity.status(HttpStatus.OK).body("");
+    @PatchMapping("/{resvId}/status")
+    public ResponseEntity<ApiResponse<ResvCancelResponseDTO>> cancelReservation(
+            @PathVariable @Positive(message = "예약 ID는 1 이상의 값이어야 합니다.") long resvId) {
+        return ResponseEntity.ok(ApiResponse.success("예약이 성공적으로 취소되었습니다.", resvService.cancelAdminReservation(resvId)));
     }
 }
