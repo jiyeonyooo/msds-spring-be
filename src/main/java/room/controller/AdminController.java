@@ -1,11 +1,11 @@
-package Room.controller;
+package room.controller;
 
-import Room.dto.request.RoomCreateRequest;
-import Room.dto.request.RoomEquipmentsUpdateRequest;
-import Room.dto.request.RoomImageCreateRequest;
-import Room.dto.request.RoomUpdateRequest;
-import Room.dto.response.RoomDetailResponse;
-import Room.dto.response.RoomImageResponse;
+import room.dto.request.RoomCreateRequest;
+import room.dto.request.RoomEquipmentsUpdateRequest;
+import room.dto.request.RoomImageCreateRequest;
+import room.dto.request.RoomUpdateRequest;
+import room.dto.response.RoomDetailResponse;
+import room.dto.response.RoomImageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;

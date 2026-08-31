@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import java.time.LocalDateTime;
 
+// GET /api/users/me 응답 바디.
 @Getter
 @AllArgsConstructor
 public class UserResponse {
@@ -14,6 +15,7 @@ public class UserResponse {
     private String phoneNumber;
     private String role;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -22,7 +24,8 @@ public class UserResponse {
                 user.getName(),
                 user.getPhoneNumber(),
                 user.getRole(),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                user.getUpdatedAt()
         );
     }
 }
