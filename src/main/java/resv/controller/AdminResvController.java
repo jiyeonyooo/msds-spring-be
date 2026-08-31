@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/admin/resv")
 public class AdminResvController {
-    //GET api/admin/resv: 관리자 전체 예약 조회/검색/필터
+    //GET api/admin/resv: ??? ?? ?? ??/??/??
     @GetMapping
     public ResponseEntity getAdminResv(
             @RequestParam(required = false) ResvStatus resvStatus,
@@ -19,23 +19,23 @@ public class AdminResvController {
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int pageNum,
             @RequestParam(defaultValue = "10") int pageSize) {
-        System.out.println("GET api/admin/resv: 관리자 전체 예약 조회/검색/필터 API 실행");
+        System.out.println("GET api/admin/resv: ??? ?? ?? ??/??/?? API ??");
         return ResponseEntity.status(HttpStatus.OK).body("");
     }
 
-    //GET api/admin/resv/{resvId}: 관리자 예약 상세 조회
+    //GET api/admin/resv/{resvId}: ??? ?? ?? ??
     @GetMapping("/{resvId}")
     public ResponseEntity getAdminResvDetail(
             @PathVariable long resvId) {
-        System.out.println("GET api/admin/resv/{resvId}: 관리자 예약 상세 조회 API 실행");
+        System.out.println("GET api/admin/resv/{resvId}: ??? ?? ?? ?? API ??");
         return ResponseEntity.status(HttpStatus.OK).body("");
     }
 
-    //PATCH api/admin/resv/{resvId}/status: 관리자 예약 상태 변경
-    @PatchMapping("/{resvId}")
+    //PATCH api/admin/resv/{resvId}/status: ??? ?? ?? ??
+    @PatchMapping("/{resvId}/status")
     public ResponseEntity patchAdminResv(
             @PathVariable long resvId) {
-        System.out.println("PATCH api/admin/resv/{resvId}/status: 관리자 예약 상태 변경 API 실행");
+        System.out.println("PATCH api/admin/resv/{resvId}/status: ??? ?? ?? ?? API ??");
         return ResponseEntity.status(HttpStatus.OK).body("");
     }
 }
