@@ -1,7 +1,10 @@
 package member.inquiry.service;
 
 import lombok.RequiredArgsConstructor;
+import member.common.exception.MemberErrorCode;
+import member.common.exception.MemberException;
 import member.inquiry.domain.Inquiry;
+import member.inquiry.domain.InquiryStatus;
 import member.inquiry.dto.InquiryAnswerRequest;
 import member.inquiry.dto.InquiryCreateRequest;
 import member.inquiry.dto.InquiryResponse;
@@ -15,10 +18,8 @@ import java.util.List;
 
 /**
  * InquiryService 구현체.
- * 관리자 권한 체크는 Spring Security의 authorities 설정이 아직 없는 상태를 감안해
- * User 엔티티의 role 컬럼을 직접 조회해서 검증한다.
- * (추후 SecurityConfig/JWT 필터에서 ROLE_ADMIN 권한 부여가 정비되면
- * 컨트롤러 레벨 @PreAuthorize("hasRole('ADMIN')")로 옮기는 걸 권장.)
+ * 관리자 권한은 SecurityConfig의 /api/admin/** hasRole("ADMIN")에서 1차로 걸러지지만,
+ * 서비스 단독 호출(테스트/내부 호출)에서도 안전하도록 User.role을 한 번 더 검증한다(이중 방어).
  */
 @Service
 @RequiredArgsConstructor
@@ -49,9 +50,8 @@ public class InquiryServiceImpl implements InquiryService {
     public List<InquiryResponse> getMyInquiries(String email) {
         User user = findUserByEmail(email);
 
-        return inquiryRepository.findByUserOrderByCreatedAtDesc(user).stream()
-                .map(InquiryResponse::from)
-                .toList();
+        // join fetch 조회라 목록 매핑 중 작성자 정보를 다시 조회하지 않는다(N+1 방지)
+        return toResponses(inquiryRepository.findAllByUserIdWithUser(user.getId()));
     }
 
     @Override
@@ -59,21 +59,24 @@ public class InquiryServiceImpl implements InquiryService {
         User user = findUserByEmail(email);
         Inquiry inquiry = findInquiryById(inquiryId);
 
-        // 본인이 작성한 문의가 아니면 접근 차단
+        // 본인이 작성한 문의가 아니면 접근 차단 (403)
         if (!inquiry.isOwnedBy(user.getId())) {
-            throw new IllegalArgumentException("본인이 작성한 문의만 조회할 수 있습니다.");
+            throw new MemberException(MemberErrorCode.INQUIRY_FORBIDDEN);
         }
 
         return InquiryResponse.from(inquiry);
     }
 
     @Override
-    public List<InquiryResponse> getAllInquiriesForAdmin(String adminEmail) {
+    public List<InquiryResponse> getAllInquiriesForAdmin(String adminEmail, InquiryStatus status) {
         validateAdmin(adminEmail);
 
-        return inquiryRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(InquiryResponse::from)
-                .toList();
+        // status 파라미터가 없으면 전체, 있으면 해당 상태(WAITING/ANSWERED)만 조회
+        List<Inquiry> inquiries = (status == null)
+                ? inquiryRepository.findAllWithUser()
+                : inquiryRepository.findAllByStatusWithUser(status);
+
+        return toResponses(inquiries);
     }
 
     @Override
@@ -83,26 +86,32 @@ public class InquiryServiceImpl implements InquiryService {
 
         Inquiry inquiry = findInquiryById(inquiryId);
         inquiry.answer(request.getAnswerContent());
-        // updatedAt은 @PreUpdate로 자동 갱신됨
+        // 변경 감지(Dirty Checking)로 트랜잭션 커밋 시 UPDATE 실행, updatedAt은 @PreUpdate로 자동 갱신
 
         return InquiryResponse.from(inquiry);
+    }
+
+    private List<InquiryResponse> toResponses(List<Inquiry> inquiries) {
+        return inquiries.stream()
+                .map(InquiryResponse::from)
+                .toList();
     }
 
     private User findUserByEmail(String email) {
         String normalizedEmail = normalizeEmail(email);
         return userRepository.findByEmail(normalizedEmail)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.USER_NOT_FOUND));
     }
 
     private Inquiry findInquiryById(Long inquiryId) {
-        return inquiryRepository.findById(inquiryId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 문의입니다."));
+        return inquiryRepository.findByIdWithUser(inquiryId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.INQUIRY_NOT_FOUND));
     }
 
     private void validateAdmin(String email) {
         User user = findUserByEmail(email);
         if (!ADMIN_ROLE.equals(user.getRole())) {
-            throw new IllegalArgumentException("관리자 권한이 없습니다.");
+            throw new MemberException(MemberErrorCode.ADMIN_ONLY);
         }
     }
 

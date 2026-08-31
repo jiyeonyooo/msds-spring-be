@@ -2,6 +2,8 @@ package member.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import member.auth.dto.*;
+import member.common.exception.MemberErrorCode;
+import member.common.exception.MemberException;
 import member.user.domain.User;
 import member.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +30,7 @@ public class AuthServiceImpl implements AuthService {
         String normalizedEmail = normalizeEmail(request.getEmail());
 
         if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new MemberException(MemberErrorCode.DUPLICATE_EMAIL);
         }
 
         User user = User.builder()
@@ -40,7 +42,8 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        return new SignupResponse(user.getEmail(), "회원가입이 완료되었습니다.");
+        // 안내 메시지는 ApiResponse의 message로 내려가므로 DTO에는 데이터만 담는다.
+        return new SignupResponse(user.getEmail());
     }
 
     @Override
@@ -48,10 +51,11 @@ public class AuthServiceImpl implements AuthService {
         String normalizedEmail = normalizeEmail(request.getEmail());
 
         User user = userRepository.findByEmail(normalizedEmail)
-                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 일치하지 않습니다."));
+                .orElseThrow(() -> new MemberException(MemberErrorCode.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 일치하지 않습니다.");
+            // 이메일 존재 여부를 노출하지 않도록 동일한 에러 코드/메시지를 사용
+            throw new MemberException(MemberErrorCode.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtTokenProvider.createToken(user.getEmail(), user.getRole());

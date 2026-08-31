@@ -1,5 +1,7 @@
 package member.inquiry.service;
 
+import member.common.exception.MemberErrorCode;
+import member.common.exception.MemberException;
 import member.inquiry.domain.Inquiry;
 import member.inquiry.domain.InquiryStatus;
 import member.inquiry.dto.InquiryAnswerRequest;
@@ -83,7 +85,7 @@ class InquiryServiceImplTest {
         Inquiry inquiry = buildInquiry(10L, owner);
 
         given(userRepository.findByEmail("owner@example.com")).willReturn(Optional.of(owner));
-        given(inquiryRepository.findById(10L)).willReturn(Optional.of(inquiry));
+        given(inquiryRepository.findByIdWithUser(10L)).willReturn(Optional.of(inquiry));
 
         InquiryResponse response = inquiryService.getMyInquiryDetail("owner@example.com", 10L);
 
@@ -98,11 +100,12 @@ class InquiryServiceImplTest {
         Inquiry inquiry = buildInquiry(10L, owner);
 
         given(userRepository.findByEmail("stranger@example.com")).willReturn(Optional.of(stranger));
-        given(inquiryRepository.findById(10L)).willReturn(Optional.of(inquiry));
+        given(inquiryRepository.findByIdWithUser(10L)).willReturn(Optional.of(inquiry));
 
         assertThatThrownBy(() -> inquiryService.getMyInquiryDetail("stranger@example.com", 10L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("본인이 작성한 문의만");
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.INQUIRY_FORBIDDEN);
     }
 
     @Test
@@ -111,9 +114,10 @@ class InquiryServiceImplTest {
         User normalUser = buildUser(1L, "user@example.com", "USER");
         given(userRepository.findByEmail("user@example.com")).willReturn(Optional.of(normalUser));
 
-        assertThatThrownBy(() -> inquiryService.getAllInquiriesForAdmin("user@example.com"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("관리자 권한이 없습니다");
+        assertThatThrownBy(() -> inquiryService.getAllInquiriesForAdmin("user@example.com", null))
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.ADMIN_ONLY);
     }
 
     @Test
@@ -124,12 +128,60 @@ class InquiryServiceImplTest {
         Inquiry inquiry = buildInquiry(10L, writer);
 
         given(userRepository.findByEmail("admin@example.com")).willReturn(Optional.of(admin));
-        given(inquiryRepository.findAllByOrderByCreatedAtDesc()).willReturn(List.of(inquiry));
+        given(inquiryRepository.findAllWithUser()).willReturn(List.of(inquiry));
 
-        List<InquiryResponse> responses = inquiryService.getAllInquiriesForAdmin("admin@example.com");
+        List<InquiryResponse> responses = inquiryService.getAllInquiriesForAdmin("admin@example.com", null);
 
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getAuthorEmail()).isEqualTo("user@example.com");
+    }
+
+    @Test
+    @DisplayName("내 문의 목록은 작성자까지 함께 조회(join fetch)하는 쿼리로 가져온다")
+    void getMyInquiries_success() {
+        User user = buildUser(1L, "user@example.com", "USER");
+        Inquiry inquiry = buildInquiry(10L, user);
+
+        given(userRepository.findByEmail("user@example.com")).willReturn(Optional.of(user));
+        given(inquiryRepository.findAllByUserIdWithUser(1L)).willReturn(List.of(inquiry));
+
+        List<InquiryResponse> responses = inquiryService.getMyInquiries("user@example.com");
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).getAuthorEmail()).isEqualTo("user@example.com");
+        // 목록 매핑 중 작성자를 다시 조회하는 일이 없어야 한다(N+1 방지)
+        verify(inquiryRepository, never()).findById(org.mockito.ArgumentMatchers.anyLong());
+    }
+
+    @Test
+    @DisplayName("관리자가 status를 지정하면 해당 상태의 문의만 조회한다")
+    void getAllInquiriesForAdmin_filterByStatus() {
+        User admin = buildUser(1L, "admin@example.com", "ADMIN");
+        User writer = buildUser(2L, "user@example.com", "USER");
+        Inquiry waiting = buildInquiry(10L, writer);
+
+        given(userRepository.findByEmail("admin@example.com")).willReturn(Optional.of(admin));
+        given(inquiryRepository.findAllByStatusWithUser(InquiryStatus.WAITING)).willReturn(List.of(waiting));
+
+        List<InquiryResponse> responses =
+                inquiryService.getAllInquiriesForAdmin("admin@example.com", InquiryStatus.WAITING);
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).getStatus()).isEqualTo(InquiryStatus.WAITING);
+        verify(inquiryRepository, never()).findAllWithUser();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 문의를 조회하면 INQUIRY_NOT_FOUND 예외가 발생한다")
+    void getMyInquiryDetail_fail_notFound() {
+        User user = buildUser(1L, "user@example.com", "USER");
+        given(userRepository.findByEmail("user@example.com")).willReturn(Optional.of(user));
+        given(inquiryRepository.findByIdWithUser(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> inquiryService.getMyInquiryDetail("user@example.com", 999L))
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.INQUIRY_NOT_FOUND);
     }
 
     @Test
@@ -140,7 +192,7 @@ class InquiryServiceImplTest {
         Inquiry inquiry = buildInquiry(10L, writer);
 
         given(userRepository.findByEmail("admin@example.com")).willReturn(Optional.of(admin));
-        given(inquiryRepository.findById(10L)).willReturn(Optional.of(inquiry));
+        given(inquiryRepository.findByIdWithUser(10L)).willReturn(Optional.of(inquiry));
 
         InquiryAnswerRequest request = new InquiryAnswerRequest();
         setField(request, "answerContent", "답변입니다.");
@@ -162,10 +214,11 @@ class InquiryServiceImplTest {
         setField(request, "answerContent", "답변입니다.");
 
         assertThatThrownBy(() -> inquiryService.answerInquiry("user@example.com", 10L, request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("관리자 권한이 없습니다");
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.ADMIN_ONLY);
 
-        verify(inquiryRepository, never()).findById(org.mockito.ArgumentMatchers.anyLong());
+        verify(inquiryRepository, never()).findByIdWithUser(org.mockito.ArgumentMatchers.anyLong());
     }
 
     // ---- 리플렉션 헬퍼 ----
