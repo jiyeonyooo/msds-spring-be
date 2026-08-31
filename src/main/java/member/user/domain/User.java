@@ -1,11 +1,16 @@
 package member.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import member.inquiry.domain.Inquiry;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 회원(User) 도메인 엔티티.
@@ -42,6 +47,17 @@ public class User {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt; // 마지막 수정 시각 (PreUpdate 콜백으로 자동 갱신)
+
+    /**
+     * 이 회원이 작성한 문의 목록 (1:N 양방향 연관관계).
+     * - 연관관계의 주인은 FK(user_id)를 가진 Inquiry 쪽이므로 여기서는 mappedBy로 "주인이 아님"을 표시한다.
+     * - cascade = REMOVE + orphanRemoval: 회원 탈퇴 시 해당 회원의 문의도 함께 삭제된다.
+     *   (이 설정이 없으면 문의가 남아있는 회원을 삭제할 때 inquiries.user_id FK 제약조건 위반이 발생한다)
+     * - @JsonIgnore: User -> Inquiry -> User 순환 참조로 JSON 직렬화가 무한 반복되는 것을 방지.
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    private List<Inquiry> inquiries = new ArrayList<>();
 
     /**
      * 회원 생성자.

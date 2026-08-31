@@ -1,5 +1,7 @@
 package member.user.service;
 
+import member.common.exception.MemberErrorCode;
+import member.common.exception.MemberException;
 import member.user.domain.User;
 import member.user.dto.UserDeleteRequest;
 import member.user.dto.UserResponse;
@@ -60,8 +62,9 @@ class UserServiceImplTest {
         given(userRepository.findByEmail("nobody@example.com")).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.getMyProfile("nobody@example.com"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("존재하지 않는 회원");
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.USER_NOT_FOUND);
     }
 
     @Test
@@ -122,8 +125,9 @@ class UserServiceImplTest {
         setField(request, "password", "wrongPassword");
 
         assertThatThrownBy(() -> userService.deleteUser("test@example.com", request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("비밀번호가 일치하지 않습니다");
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.PASSWORD_MISMATCH);
 
         verify(userRepository, never()).delete(any());
     }

@@ -4,6 +4,8 @@ import member.auth.dto.LoginRequest;
 import member.auth.dto.LoginResponse;
 import member.auth.dto.SignupRequest;
 import member.auth.dto.SignupResponse;
+import member.common.exception.MemberErrorCode;
+import member.common.exception.MemberException;
 import member.user.domain.User;
 import member.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -73,8 +75,9 @@ class AuthServiceImplTest {
         given(userRepository.existsByEmail("dup@example.com")).willReturn(true);
 
         assertThatThrownBy(() -> authService.signup(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("이미 가입된 이메일");
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.DUPLICATE_EMAIL);
 
         verify(userRepository, never()).save(any());
     }
@@ -112,8 +115,9 @@ class AuthServiceImplTest {
         given(userRepository.findByEmail("notfound@example.com")).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("이메일 또는 비밀번호");
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.INVALID_CREDENTIALS);
     }
 
     @Test
@@ -134,8 +138,9 @@ class AuthServiceImplTest {
         given(passwordEncoder.matches("wrongPassword", "encodedPassword")).willReturn(false);
 
         assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("이메일 또는 비밀번호");
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.INVALID_CREDENTIALS);
     }
 
     // DTO에 생성자/세터가 없고 @NoArgsConstructor + private 필드만 있어서
