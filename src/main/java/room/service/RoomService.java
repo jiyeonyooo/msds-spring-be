@@ -6,6 +6,8 @@ import room.dto.response.EquipmentResponse;
 import room.dto.response.RoomDetailResponse;
 import room.dto.response.RoomSpecsResponse;
 import room.dto.response.RoomSummaryResponse;
+import room.dto.request.RoomCreateRequest;
+import room.dto.request.RoomUpdateRequest;
 import room.entity.Room;
 import room.entity.RoomEquipment;
 import room.entity.RoomEquipmentMapping;
@@ -36,13 +38,64 @@ public class RoomService {
     }
 
     public RoomDetailResponse getRoom(Long roomId) {
-        Room room = roomRepository.findDetailById(roomId)
+        Room room = findRoomDetail(roomId);
+
+        return toDetailResponse(room);
+    }
+
+    @Transactional
+    public RoomDetailResponse createRoom(RoomCreateRequest request) {
+        Room room = Room.create(
+                request.name(),
+                request.description(),
+                request.roomType(),
+                request.status(),
+                request.minGuest(),
+                request.maxGuest(),
+                request.area(),
+                request.basePrice()
+        );
+
+        return toDetailResponse(roomRepository.save(room));
+    }
+
+    @Transactional
+    public RoomDetailResponse updateRoom(Long roomId, RoomUpdateRequest request) {
+        Room room = findRoomDetail(roomId);
+
+        int minGuest = request.minGuest() == null
+                ? room.getStandardGuests()
+                : request.minGuest();
+        int maxGuest = request.maxGuest() == null
+                ? room.getMaxGuests()
+                : request.maxGuest();
+
+        if (minGuest > maxGuest) {
+            throw new IllegalArgumentException(
+                    "최대 숙박 인원은 최소 숙박 인원 이상이어야 합니다."
+            );
+        }
+
+        room.update(
+                request.name(),
+                request.description(),
+                request.roomType(),
+                request.status(),
+                request.minGuest(),
+                request.maxGuest(),
+                request.area(),
+                request.basePrice()
+        );
+
+        return toDetailResponse(room);
+    }
+
+    private Room findRoomDetail(Long roomId) {
+        return roomRepository.findDetailById(roomId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Room not found: " + roomId
                 ));
-
-        return toDetailResponse(room);
     }
 
     private RoomSummaryResponse toSummaryResponse(Room room) {

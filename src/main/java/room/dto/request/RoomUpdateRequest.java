@@ -1,22 +1,46 @@
 package room.dto.request;
 
-import room.dto.type.BedType;
-import room.dto.type.RoomStatus;
-import room.dto.type.RoomType;
-import room.dto.type.ViewType;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
+import room.entity.enums.RoomStatus;
+import room.entity.enums.RoomType;
 
 import java.math.BigDecimal;
 
 public record RoomUpdateRequest(
+        @Size(min = 1, max = 100, message = "객실명은 1자 이상 100자 이하여야 합니다.")
         String name,
+
+        @Size(min = 1, message = "객실 상세 설명은 비어 있을 수 없습니다.")
         String description,
+
         RoomType roomType,
         RoomStatus status,
-        Integer standardGuests,
-        Integer maxGuests,
-        BigDecimal areaM2,
-        Integer basePrice,
-        BedType bedType,
-        Integer bedCount,
-        ViewType viewType
-) {}
+
+        @Min(value = 1, message = "최소 숙박 인원은 1명 이상이어야 합니다.")
+        Integer minGuest,
+
+        @Min(value = 1, message = "최대 숙박 인원은 1명 이상이어야 합니다.")
+        Integer maxGuest,
+
+        @DecimalMin(value = "0.01", message = "객실 면적은 0보다 커야 합니다.")
+        BigDecimal area,
+
+        @Min(value = 0, message = "1박 기본 가격은 0원 이상이어야 합니다.")
+        Integer basePrice
+) {
+
+    @AssertTrue(message = "수정할 객실 정보를 하나 이상 입력해야 합니다.")
+    public boolean isAnyFieldPresent() {
+        return name != null
+                || description != null
+                || roomType != null
+                || status != null
+                || minGuest != null
+                || maxGuest != null
+                || area != null
+                || basePrice != null;
+    }
+}
