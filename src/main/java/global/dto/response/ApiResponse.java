@@ -9,6 +9,10 @@ public record ApiResponse<T>(
         T data
 ) {
 
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return new ApiResponse<>(HttpStatus.OK.name(), message, data);
+    }
+
     public static <T> ResponseEntity<ApiResponse<T>> success(
             HttpStatus status,
             String message,
@@ -24,5 +28,9 @@ public record ApiResponse<T>(
     ) {
         ApiResponse<Void> response = new ApiResponse<>(status.name(), message, null);
         return ResponseEntity.status(status).body(response);
+    }
+
+    public static <T> ApiResponse<T> error(String code, String message, T data) {
+        return new ApiResponse<>(code, message, data);
     }
 }
