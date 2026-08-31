@@ -9,6 +9,6 @@ public record ReviewResponse(Long id, String programName, String memberName,
     public static ReviewResponse from(Review r) {
         var resv = r.getProgramReservation();
         return new ReviewResponse(r.getId(), resv.getProgram().getName(),
-                resv.getMember().getName(), r.getContent(), r.getCreatedAt());
+                resv.getUser().getName(), r.getContent(), r.getCreatedAt());
     }
 }
