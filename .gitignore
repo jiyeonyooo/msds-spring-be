@@ -5,8 +5,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### application properties
-src/main/resources/application.properties
+### Local environment variables
+.env
+.env.*
+!.env.example
 
 ### STS ###
 .apt_generated
