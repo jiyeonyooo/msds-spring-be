@@ -93,4 +93,9 @@ public class Resv {
     void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    public void cancel(LocalDateTime cancelledAt) {
+        this.resvStatus = ResvStatus.CANCELLED;
+        this.cancelledAt = cancelledAt;
+    }
 }
