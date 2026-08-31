@@ -7,14 +7,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import resv.dto.CreateResvRequestDTO;
 import resv.dto.MyResvSearchRequestDTO;
 import resv.dto.ResvAvailabilityRequestDTO;
+import resv.dto.CreateResvResponseDTO;
+import resv.service.ResvService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/resv")
 @Validated
+@RequiredArgsConstructor
 public class UserResvController {
+    private final ResvService resvService;
     //GET api/resv: 날짜/인원 기준 예약 현황 조회
     @GetMapping
     public ResponseEntity<ApiResponse<Void>> getResv(@Valid @ModelAttribute ResvAvailabilityRequestDTO request) {
@@ -24,12 +31,12 @@ public class UserResvController {
 
     //POST api/resv: 예약 생성
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> createResv(
-            @Valid @RequestBody CreateResvRequestDTO crr){
-        System.out.println("POST api/resv: 예약 생성 API 실행");
-        System.out.println(crr);
+    public ResponseEntity<ApiResponse<CreateResvResponseDTO>> createResv(
+            @AuthenticationPrincipal UserDetails principal,
+            @Valid @RequestBody CreateResvRequestDTO request) {
+        CreateResvResponseDTO response = resvService.create(principal.getUsername(), request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("예약이 성공적으로 생성되었습니다.", null));
+                .body(ApiResponse.success("예약이 성공적으로 생성되었습니다.", response));
     }
 
     //GET api/resv/me: 내 예약 목록 조회

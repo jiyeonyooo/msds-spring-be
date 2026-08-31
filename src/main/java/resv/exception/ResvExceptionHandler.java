@@ -27,6 +27,12 @@ public class ResvExceptionHandler {
                 .body(ApiResponse.error(errorCode.name(), errorCode.getMessage(), null));
     }
 
+    @ExceptionHandler(ResvValidationException.class)
+    public ResponseEntity<ApiResponse<ValidationErrorResponse>> handleResvValidationException(
+            ResvValidationException exception) {
+        return validationFailed(List.of(exception.getError()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<ValidationErrorResponse>> handleMethodArgumentNotValid(
             MethodArgumentNotValidException exception) {

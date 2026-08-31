@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(scanBasePackages = {"com.example.meditation", "resv"})
-@EntityScan(basePackages = "resv.entity")
-@EnableJpaRepositories(basePackages = "resv.repository")
+@SpringBootApplication(scanBasePackages = {"com.example.meditation", "member", "resv"})
+@EntityScan(basePackages = {"member.user.domain", "resv.entity", "room.entity"})
+@EnableJpaRepositories(basePackages = {"member.user.repository", "resv.repository", "room.repository"})
 public class MeditationApplication {
 
 	public static void main(String[] args) {
