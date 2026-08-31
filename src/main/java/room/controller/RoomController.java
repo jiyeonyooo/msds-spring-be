@@ -1,38 +1,41 @@
 package Room.controller;
 
+import Room.dto.response.RoomAvailabilityResponse;
 import Room.dto.response.RoomDetailResponse;
 import Room.dto.response.RoomSummaryResponse;
-import Room.service.RoomService;
-import global.dto.response.ApiResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/rooms")
-@RequiredArgsConstructor
+@RequestMapping("/api")
 public class RoomController {
 
-    private final RoomService roomService;
-
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<RoomSummaryResponse>>> getRooms() {
-        return ResponseEntity.ok(ApiResponse.success(
-                "객실 목록 조회에 성공했습니다.",
-                roomService.getRooms()
-        ));
+    @GetMapping("/accommodations/{accommodationId}/rooms")
+    public ResponseEntity<List<RoomSummaryResponse>> getRooms(
+            @PathVariable Long accommodationId
+    ) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    @GetMapping("/{roomId}")
-    public ResponseEntity<ApiResponse<RoomDetailResponse>> getRoom(@PathVariable Long roomId) {
-        return ResponseEntity.ok(ApiResponse.success(
-                "객실 상세 조회에 성공했습니다.",
-                roomService.getRoom(roomId)
-        ));
+    @GetMapping("/rooms/{roomId}")
+    public ResponseEntity<RoomDetailResponse> getRoom(@PathVariable Long roomId) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @GetMapping("/rooms/{roomId}/availability")
+    public ResponseEntity<RoomAvailabilityResponse> getAvailability(
+            @PathVariable Long roomId,
+            @RequestParam LocalDate checkIn,
+            @RequestParam LocalDate checkOut,
+            @RequestParam Integer guests
+    ) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }
