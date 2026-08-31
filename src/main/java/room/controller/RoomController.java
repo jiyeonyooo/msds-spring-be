@@ -1,4 +1,4 @@
-package Room.controller;
+package room.controller;
 
 import room.dto.response.RoomAvailabilityResponse;
 import room.dto.response.RoomDetailResponse;
