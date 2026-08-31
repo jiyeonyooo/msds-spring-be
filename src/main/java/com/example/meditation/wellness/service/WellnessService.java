@@ -2,9 +2,12 @@ package com.example.meditation.wellness.service;
 
 import com.example.meditation.wellness.dto.request.WellnessCheckRequest;
 import com.example.meditation.wellness.dto.response.WellnessCheckResultResponse;
+import com.example.meditation.wellness.dto.response.WellnessAnswerDetailResponse;
+import com.example.meditation.wellness.dto.response.WellnessCheckDetailResponse;
 import com.example.meditation.wellness.dto.response.WellnessHistoryResponse;
 import com.example.meditation.wellness.dto.response.WellnessQuestionOptionResponse;
 import com.example.meditation.wellness.dto.response.WellnessQuestionResponse;
+import com.example.meditation.wellness.dto.response.WellnessTrendPointResponse;
 import com.example.meditation.wellness.entity.QuestionStatus;
 import com.example.meditation.wellness.entity.SurveyStatus;
 import com.example.meditation.wellness.entity.WellnessAnswer;
@@ -99,6 +102,51 @@ public class WellnessService {
                         check.getTotalScore(),
                         check.getResultLevel(),
                         check.getStayStage(),
+                        check.getCheckedAt()
+                ))
+                .toList();
+    }
+
+    public WellnessCheckDetailResponse getCheckDetail(String email, Long checkId) {
+        User user = findUser(email);
+        WellnessCheck check = checkRepository.findByIdAndMemberId(checkId, user.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "마음상태 검사 결과를 찾을 수 없습니다."
+                ));
+
+        List<WellnessAnswerDetailResponse> answers = answerRepository
+                .findAllByWellnessCheckOrderByWellnessQuestionDisplayOrderAsc(check)
+                .stream()
+                .map(answer -> new WellnessAnswerDetailResponse(
+                        answer.getWellnessQuestion().getId(),
+                        answer.getWellnessQuestion().getCategory(),
+                        answer.getWellnessQuestion().getContent(),
+                        answer.getAnswerValue(),
+                        answer.getConvertedValue()
+                ))
+                .toList();
+
+        return new WellnessCheckDetailResponse(
+                check.getId(),
+                check.getReservationId(),
+                check.getTotalScore(),
+                check.getResultLevel(),
+                check.getResultLevel().getLabel(),
+                check.getResultLevel().getMessage(),
+                check.getStayStage(),
+                check.getCheckedAt(),
+                answers
+        );
+    }
+
+    public List<WellnessTrendPointResponse> getTrend(String email) {
+        User user = findUser(email);
+        return checkRepository.findAllByMemberIdOrderByCheckedAtAsc(user.getId()).stream()
+                .map(check -> new WellnessTrendPointResponse(
+                        check.getId(),
+                        check.getTotalScore(),
+                        check.getResultLevel(),
                         check.getCheckedAt()
                 ))
                 .toList();

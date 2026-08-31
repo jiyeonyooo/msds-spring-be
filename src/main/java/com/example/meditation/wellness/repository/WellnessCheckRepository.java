@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface WellnessCheckRepository extends JpaRepository<WellnessCheck, Long> {
     List<WellnessCheck> findAllByMemberIdOrderByCheckedAtDesc(Long memberId);
+    List<WellnessCheck> findAllByMemberIdOrderByCheckedAtAsc(Long memberId);
     Optional<WellnessCheck> findByIdAndMemberId(Long id, Long memberId);
 }
