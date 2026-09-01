@@ -15,16 +15,15 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "quietness_thresholds", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_quietness_threshold_level", columnNames = {"guesthouse_id", "level"})
+@Table(name = "quiet_spaces", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_quiet_space_name", columnNames = {"guesthouse_id", "name"})
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class QuietnessThreshold {
+public class QuietSpace {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,18 +32,15 @@ public class QuietnessThreshold {
     @Column(name = "guesthouse_id", nullable = false)
     private Long guesthouseId;
 
+    @Column(nullable = false, length = 100)
+    private String name;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private QuietnessLevel level;
+    @Column(nullable = false, length = 30)
+    private QuietSpaceType type;
 
-    @Column(name = "min_decibel", precision = 5, scale = 2)
-    private BigDecimal minDecibel;
-
-    @Column(name = "max_decibel", precision = 5, scale = 2)
-    private BigDecimal maxDecibel;
-
-    @Column(name = "display_order", nullable = false)
-    private Integer displayOrder;
+    @Column(nullable = false)
+    private boolean active;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -52,24 +48,11 @@ public class QuietnessThreshold {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public QuietnessThreshold(
-            Long guesthouseId,
-            QuietnessLevel level,
-            BigDecimal minDecibel,
-            BigDecimal maxDecibel,
-            Integer displayOrder
-    ) {
+    public QuietSpace(Long guesthouseId, String name, QuietSpaceType type) {
         this.guesthouseId = guesthouseId;
-        this.level = level;
-        this.minDecibel = minDecibel;
-        this.maxDecibel = maxDecibel;
-        this.displayOrder = displayOrder;
-    }
-
-    public boolean includes(BigDecimal value) {
-        boolean aboveMinimum = minDecibel == null || value.compareTo(minDecibel) >= 0;
-        boolean belowMaximum = maxDecibel == null || value.compareTo(maxDecibel) <= 0;
-        return aboveMinimum && belowMaximum;
+        this.name = name;
+        this.type = type;
+        this.active = true;
     }
 
     @PrePersist

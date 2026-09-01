@@ -60,6 +60,31 @@ public class NoiseDevice {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    public NoiseDevice(
+            Long guesthouseId,
+            Long spaceId,
+            String deviceName,
+            String serialNumber,
+            String modelName,
+            NoiseDeviceStatus status
+    ) {
+        this.guesthouseId = guesthouseId;
+        this.spaceId = spaceId;
+        this.deviceName = deviceName;
+        this.serialNumber = serialNumber;
+        this.modelName = modelName;
+        this.status = status;
+        this.installedAt = LocalDateTime.now();
+    }
+
+    public void updateStatus(NoiseDeviceStatus status) {
+        this.status = status;
+    }
+
+    public void markConnected(LocalDateTime connectedAt) {
+        this.lastConnectedAt = connectedAt;
+    }
+
     @PrePersist
     private void onCreate() {
         LocalDateTime now = LocalDateTime.now();
