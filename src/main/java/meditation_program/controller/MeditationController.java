@@ -26,14 +26,18 @@ public class MeditationController {
     }
 
     @PostMapping("/program")
-    public ResponseEntity<Void> reserveProgram(@AuthenticationPrincipal Long userId,
+    // TODO: 인증 붙이면 @AuthenticationPrincipal로 원복 필요
+    public ResponseEntity<Void> reserveProgram(//@AuthenticationPrincipal Long userId,
+                                               @RequestParam Long userId,
                                                @RequestBody @Valid ReservationRequest request) {
         Long reservationId = programService.reserve(userId, request);
         return ResponseEntity.created(URI.create("/meditation/program/reservation/" + reservationId)).build();
     }
 
     @DeleteMapping("/program/reservation/{reservationId}")
-    public ResponseEntity<Void> cancelReservation(@AuthenticationPrincipal Long userId,
+    // TODO: 인증 붙이면 @AuthenticationPrincipal로 원복 필요
+    public ResponseEntity<Void> cancelReservation(//@AuthenticationPrincipal Long userId,
+                                                  @RequestParam Long userId,
                                                   @PathVariable Long reservationId) {
         programService.cancelReservation(userId, reservationId);
         return ResponseEntity.noContent().build();
@@ -45,14 +49,18 @@ public class MeditationController {
     }
 
     @PostMapping("/review")
-    public ResponseEntity<Void> addReview(@AuthenticationPrincipal Long userId,
+    // TODO: 인증 붙이면 @AuthenticationPrincipal로 원복 필요
+    public ResponseEntity<Void> addReview(//@AuthenticationPrincipal Long userId,
+                                          @RequestParam Long userId,
                                           @RequestBody @Valid ReviewCreateRequest request) {
         Long reviewId = reviewService.addReview(userId, request);
         return ResponseEntity.created(URI.create("/meditation/review/" + reviewId)).build();
     }
 
     @DeleteMapping("/review/{reviewId}")
-    public ResponseEntity<Void> deleteReview(@AuthenticationPrincipal Long userId,
+    // TODO: 인증 붙이면 @AuthenticationPrincipal로 원복 필요
+    public ResponseEntity<Void> deleteReview(//@AuthenticationPrincipal Long userId,
+                                             @RequestParam Long userId,
                                              @PathVariable Long reviewId) {
         reviewService.deleteReview(userId, reviewId);
         return ResponseEntity.noContent().build();
