@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface QuietnessThresholdRepository extends JpaRepository<QuietnessThreshold, Long> {
     List<QuietnessThreshold> findAllByGuesthouseIdOrderByDisplayOrderAsc(Long guesthouseId);
+
+    boolean existsByGuesthouseId(Long guesthouseId);
 }

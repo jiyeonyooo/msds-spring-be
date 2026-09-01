@@ -2,12 +2,16 @@ package com.example.meditation.quietness.service;
 
 import com.example.meditation.quietness.dto.request.NoiseDeviceCreateRequest;
 import com.example.meditation.quietness.dto.request.NoiseMeasurementCreateRequest;
+import com.example.meditation.quietness.dto.request.QuietSpaceCreateRequest;
 import com.example.meditation.quietness.dto.response.NoiseMeasurementResponse;
 import com.example.meditation.quietness.entity.NoiseDevice;
 import com.example.meditation.quietness.entity.NoiseDeviceStatus;
 import com.example.meditation.quietness.entity.NoiseMeasurement;
+import com.example.meditation.quietness.entity.QuietSpace;
+import com.example.meditation.quietness.entity.QuietSpaceType;
 import com.example.meditation.quietness.repository.NoiseDeviceRepository;
 import com.example.meditation.quietness.repository.NoiseMeasurementRepository;
+import com.example.meditation.quietness.repository.QuietSpaceRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -27,8 +31,15 @@ class QuietnessAdminServiceTest {
 
     private final NoiseDeviceRepository deviceRepository = mock(NoiseDeviceRepository.class);
     private final NoiseMeasurementRepository measurementRepository = mock(NoiseMeasurementRepository.class);
+    private final QuietSpaceRepository spaceRepository = mock(QuietSpaceRepository.class);
+    private final QuietnessThresholdService thresholdService = mock(QuietnessThresholdService.class);
     private final QuietnessAdminService service =
-            new QuietnessAdminService(deviceRepository, measurementRepository);
+            new QuietnessAdminService(
+                    deviceRepository,
+                    measurementRepository,
+                    spaceRepository,
+                    thresholdService
+            );
 
     @Test
     void 중복된_일련번호의_기기는_등록할_수_없다() {
@@ -60,6 +71,25 @@ class QuietnessAdminServiceTest {
         assertThat(response.measurementId()).isEqualTo(100L);
         assertThat(response.spaceId()).isEqualTo(10L);
         assertThat(device.getLastConnectedAt()).isEqualTo(measuredAt);
+    }
+
+    @Test
+    void 공간을_등록하면_숙소의_기본_데시벨_기준도_초기화한다() {
+        QuietSpace savedSpace = new QuietSpace(1L, "명상실", QuietSpaceType.MEDITATION_ROOM);
+        ReflectionTestUtils.setField(savedSpace, "id", 10L);
+        when(spaceRepository.existsByGuesthouseIdAndName(1L, "명상실")).thenReturn(false);
+        when(spaceRepository.save(any(QuietSpace.class))).thenReturn(savedSpace);
+
+        var response = service.createSpace(
+                new QuietSpaceCreateRequest(
+                        1L,
+                        "명상실",
+                        QuietSpaceType.MEDITATION_ROOM
+                )
+        );
+
+        assertThat(response.spaceId()).isEqualTo(10L);
+        verify(thresholdService).initializeDefaultsIfMissing(1L);
     }
 
     @Test

@@ -7,11 +7,15 @@ import com.example.meditation.quietness.dto.response.SpaceQuietnessResponse;
 import com.example.meditation.quietness.entity.NoiseMeasurement;
 import com.example.meditation.quietness.entity.QuietnessLevel;
 import com.example.meditation.quietness.entity.QuietnessThreshold;
+import com.example.meditation.quietness.entity.QuietSpace;
+import com.example.meditation.quietness.entity.QuietSpaceType;
 import com.example.meditation.quietness.repository.NoiseMeasurementRepository;
+import com.example.meditation.quietness.repository.QuietSpaceRepository;
 import com.example.meditation.quietness.repository.QuietnessThresholdRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,7 +30,9 @@ class QuietnessServiceTest {
 
     private final NoiseMeasurementRepository measurementRepository = mock(NoiseMeasurementRepository.class);
     private final QuietnessThresholdRepository thresholdRepository = mock(QuietnessThresholdRepository.class);
-    private final QuietnessService service = new QuietnessService(measurementRepository, thresholdRepository);
+    private final QuietSpaceRepository spaceRepository = mock(QuietSpaceRepository.class);
+    private final QuietnessService service =
+            new QuietnessService(measurementRepository, thresholdRepository, spaceRepository);
 
     private final LocalDateTime measuredAt = LocalDateTime.of(2026, 8, 31, 15, 0);
 
@@ -38,6 +44,12 @@ class QuietnessServiceTest {
                         threshold(QuietnessLevel.NORMAL, "40.00", "60.00", 2),
                         threshold(QuietnessLevel.LOUD, "60.01", null, 3)
                 ));
+        QuietSpace firstSpace = space(10L, "명상실", QuietSpaceType.MEDITATION_ROOM);
+        QuietSpace secondSpace = space(20L, "1층 라운지", QuietSpaceType.LOUNGE);
+        when(spaceRepository.findAllByGuesthouseIdOrderByIdAsc(1L))
+                .thenReturn(List.of(firstSpace, secondSpace));
+        when(spaceRepository.findById(10L)).thenReturn(java.util.Optional.of(firstSpace));
+        when(spaceRepository.findById(20L)).thenReturn(java.util.Optional.of(secondSpace));
     }
 
     @Test
@@ -60,6 +72,8 @@ class QuietnessServiceTest {
         List<SpaceQuietnessResponse> responses = service.getSpaces(1L);
 
         assertThat(responses).extracting(SpaceQuietnessResponse::spaceId).containsExactly(10L, 20L);
+        assertThat(responses).extracting(SpaceQuietnessResponse::spaceName)
+                .containsExactly("명상실", "1층 라운지");
         assertThat(responses).extracting(SpaceQuietnessResponse::level)
                 .containsExactly(QuietnessLevel.QUIET, QuietnessLevel.NORMAL);
     }
@@ -72,6 +86,8 @@ class QuietnessServiceTest {
         QuietSpaceRecommendationResponse response = service.recommendQuietSpace(1L);
 
         assertThat(response.spaceId()).isEqualTo(10L);
+        assertThat(response.spaceName()).isEqualTo("명상실");
+        assertThat(response.spaceType()).isEqualTo(QuietSpaceType.MEDITATION_ROOM);
         assertThat(response.decibel()).isEqualByComparingTo("30.00");
         assertThat(response.level()).isEqualTo(QuietnessLevel.QUIET);
     }
@@ -130,5 +146,11 @@ class QuietnessServiceTest {
                 maximum == null ? null : new BigDecimal(maximum),
                 displayOrder
         );
+    }
+
+    private QuietSpace space(Long id, String name, QuietSpaceType type) {
+        QuietSpace space = new QuietSpace(1L, name, type);
+        ReflectionTestUtils.setField(space, "id", id);
+        return space;
     }
 }

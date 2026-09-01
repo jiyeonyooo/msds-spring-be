@@ -3,8 +3,10 @@ package com.example.meditation.quietness.controller;
 import com.example.meditation.quietness.dto.request.NoiseDeviceCreateRequest;
 import com.example.meditation.quietness.dto.request.NoiseDeviceStatusUpdateRequest;
 import com.example.meditation.quietness.dto.request.NoiseMeasurementCreateRequest;
+import com.example.meditation.quietness.dto.request.QuietSpaceCreateRequest;
 import com.example.meditation.quietness.dto.response.NoiseDeviceResponse;
 import com.example.meditation.quietness.dto.response.NoiseMeasurementResponse;
+import com.example.meditation.quietness.dto.response.QuietSpaceResponse;
 import com.example.meditation.quietness.service.QuietnessAdminService;
 import global.dto.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -25,6 +27,24 @@ import java.util.List;
 public class AdminQuietnessController {
 
     private final QuietnessAdminService quietnessAdminService;
+
+    @GetMapping("/guesthouses/{guesthouseId}/spaces")
+    public ApiResponse<List<QuietSpaceResponse>> getSpaces(@PathVariable Long guesthouseId) {
+        return ApiResponse.success(
+                "조용함 측정 공간 목록을 조회했습니다.",
+                quietnessAdminService.getSpaces(guesthouseId)
+        );
+    }
+
+    @PostMapping("/spaces")
+    public ApiResponse<QuietSpaceResponse> createSpace(
+            @Valid @RequestBody QuietSpaceCreateRequest request
+    ) {
+        return ApiResponse.success(
+                "조용함 측정 공간을 등록했습니다.",
+                quietnessAdminService.createSpace(request)
+        );
+    }
 
     @GetMapping("/guesthouses/{guesthouseId}/devices")
     public ApiResponse<List<NoiseDeviceResponse>> getDevices(@PathVariable Long guesthouseId) {

@@ -8,8 +8,10 @@ import com.example.meditation.quietness.dto.response.SpaceQuietnessResponse;
 import com.example.meditation.quietness.entity.NoiseMeasurement;
 import com.example.meditation.quietness.entity.QuietnessLevel;
 import com.example.meditation.quietness.entity.QuietnessThreshold;
+import com.example.meditation.quietness.entity.QuietSpace;
 import com.example.meditation.quietness.repository.NoiseMeasurementRepository;
 import com.example.meditation.quietness.repository.QuietnessThresholdRepository;
+import com.example.meditation.quietness.repository.QuietSpaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class QuietnessService {
 
     private final NoiseMeasurementRepository measurementRepository;
     private final QuietnessThresholdRepository thresholdRepository;
+    private final QuietSpaceRepository spaceRepository;
 
     public SpaceQuietnessResponse getCurrentQuietness(Long guesthouseId, Long spaceId) {
         NoiseMeasurement measurement = measurementRepository.findTopBySpaceIdOrderByMeasuredAtDesc(spaceId)
@@ -45,8 +48,12 @@ public class QuietnessService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 숙소의 공간이 아닙니다.");
         }
 
+        QuietSpace space = findSpace(guesthouseId, spaceId);
+
         return new SpaceQuietnessResponse(
                 spaceId,
+                space.getName(),
+                space.getType(),
                 measurement.getDecibel(),
                 resolveLevel(guesthouseId, measurement.getDecibel()),
                 measurement.getMeasuredAt()
@@ -75,8 +82,9 @@ public class QuietnessService {
 
     public List<SpaceQuietnessResponse> getSpaces(Long guesthouseId) {
         List<QuietnessThreshold> thresholds = thresholds(guesthouseId);
+        Map<Long, QuietSpace> spaces = spacesById(guesthouseId);
         return latestMeasurements(guesthouseId).stream()
-                .map(measurement -> toSpaceResponse(measurement, thresholds))
+                .map(measurement -> toSpaceResponse(measurement, thresholds, spaces))
                 .toList();
     }
 
@@ -84,10 +92,13 @@ public class QuietnessService {
         NoiseMeasurement quietest = latestMeasurements(guesthouseId).stream()
                 .min(Comparator.comparing(NoiseMeasurement::getDecibel))
                 .orElseThrow();
+        QuietSpace space = findSpace(guesthouseId, quietest.getSpaceId());
 
         return new QuietSpaceRecommendationResponse(
                 guesthouseId,
                 quietest.getSpaceId(),
+                space.getName(),
+                space.getType(),
                 quietest.getDecibel(),
                 resolveLevel(guesthouseId, quietest.getDecibel()),
                 quietest.getMeasuredAt()
@@ -208,13 +219,37 @@ public class QuietnessService {
 
     private SpaceQuietnessResponse toSpaceResponse(
             NoiseMeasurement measurement,
-            List<QuietnessThreshold> thresholds
+            List<QuietnessThreshold> thresholds,
+            Map<Long, QuietSpace> spaces
     ) {
+        QuietSpace space = spaces.get(measurement.getSpaceId());
+        if (space == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "조용함 측정 공간을 찾을 수 없습니다.");
+        }
         return new SpaceQuietnessResponse(
                 measurement.getSpaceId(),
+                space.getName(),
+                space.getType(),
                 measurement.getDecibel(),
                 resolveLevel(thresholds, measurement.getDecibel()),
                 measurement.getMeasuredAt()
         );
+    }
+
+    private Map<Long, QuietSpace> spacesById(Long guesthouseId) {
+        return spaceRepository.findAllByGuesthouseIdOrderByIdAsc(guesthouseId).stream()
+                .collect(Collectors.toMap(QuietSpace::getId, space -> space));
+    }
+
+    private QuietSpace findSpace(Long guesthouseId, Long spaceId) {
+        QuietSpace space = spaceRepository.findById(spaceId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "조용함 측정 공간을 찾을 수 없습니다."
+                ));
+        if (!space.getGuesthouseId().equals(guesthouseId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 숙소의 공간이 아닙니다.");
+        }
+        return space;
     }
 }
