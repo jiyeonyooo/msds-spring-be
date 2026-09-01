@@ -27,6 +27,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Facility {
 
+    public static Facility create(
+            String name,
+            FacilityCategory category,
+            String description,
+            String imageUrl,
+            Boolean active
+    ) {
+        Facility facility = new Facility();
+        facility.name = name;
+        facility.category = category;
+        facility.description = description;
+        facility.imageUrl = imageUrl;
+        facility.active = active == null || active;
+        return facility;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -53,6 +69,30 @@ public class Facility {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public void update(
+            String name,
+            FacilityCategory category,
+            String description,
+            String imageUrl,
+            Boolean active
+    ) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (category != null) {
+            this.category = category;
+        }
+        if (description != null) {
+            this.description = description;
+        }
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
+        if (active != null) {
+            this.active = active;
+        }
+    }
 
     @PrePersist
     private void onCreate() {
