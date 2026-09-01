@@ -8,6 +8,10 @@ import java.util.List;
 
 public interface FacilityRepository extends JpaRepository<Facility, Long> {
 
+    boolean existsByName(String name);
+
+    boolean existsByNameAndIdNot(String name, Long id);
+
     List<Facility> findAllByActiveTrueOrderByCategoryAscNameAsc();
 
     List<Facility> findAllByCategoryAndActiveTrueOrderByNameAsc(FacilityCategory category);
