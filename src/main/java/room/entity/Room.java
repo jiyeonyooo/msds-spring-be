@@ -32,6 +32,28 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Room {
 
+    public static Room create(
+            String name,
+            String description,
+            RoomType roomType,
+            RoomStatus status,
+            Integer standardGuests,
+            Integer maxGuests,
+            BigDecimal areaM2,
+            Integer basePrice
+    ) {
+        Room room = new Room();
+        room.name = name;
+        room.description = description;
+        room.roomType = roomType;
+        room.status = status;
+        room.standardGuests = standardGuests;
+        room.maxGuests = maxGuests;
+        room.areaM2 = areaM2;
+        room.basePrice = basePrice;
+        return room;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -83,6 +105,42 @@ public class Room {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public void update(
+            String name,
+            String description,
+            RoomType roomType,
+            RoomStatus status,
+            Integer standardGuests,
+            Integer maxGuests,
+            BigDecimal areaM2,
+            Integer basePrice
+    ) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (description != null) {
+            this.description = description;
+        }
+        if (roomType != null) {
+            this.roomType = roomType;
+        }
+        if (status != null) {
+            this.status = status;
+        }
+        if (standardGuests != null) {
+            this.standardGuests = standardGuests;
+        }
+        if (maxGuests != null) {
+            this.maxGuests = maxGuests;
+        }
+        if (areaM2 != null) {
+            this.areaM2 = areaM2;
+        }
+        if (basePrice != null) {
+            this.basePrice = basePrice;
+        }
+    }
 
     @PrePersist
     private void onCreate() {
