@@ -6,7 +6,8 @@ import com.example.meditation.quietness.entity.QuietSpaceType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record SpaceQuietnessResponse(
+public record QuietSpaceRecommendationResponse(
+        Long guesthouseId,
         Long spaceId,
         String spaceName,
         QuietSpaceType spaceType,
