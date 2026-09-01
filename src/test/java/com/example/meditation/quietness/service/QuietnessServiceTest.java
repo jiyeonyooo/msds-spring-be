@@ -1,6 +1,7 @@
 package com.example.meditation.quietness.service;
 
 import com.example.meditation.quietness.dto.response.GuesthouseQuietnessSummaryResponse;
+import com.example.meditation.quietness.dto.response.HourlyQuietnessResponse;
 import com.example.meditation.quietness.dto.response.QuietSpaceRecommendationResponse;
 import com.example.meditation.quietness.dto.response.SpaceQuietnessResponse;
 import com.example.meditation.quietness.entity.NoiseMeasurement;
@@ -83,8 +84,37 @@ class QuietnessServiceTest {
                 .isInstanceOf(ResponseStatusException.class);
     }
 
+    @Test
+    void 측정값을_시간단위로_묶어_평균과_최소최대를_계산한다() {
+        LocalDateTime from = measuredAt.withMinute(0);
+        LocalDateTime to = from.plusHours(2);
+        when(measurementRepository
+                .findAllByGuesthouseIdAndSpaceIdAndMeasuredAtBetweenOrderByMeasuredAtAsc(
+                        1L, 10L, from, to
+                ))
+                .thenReturn(List.of(
+                        measurement(10L, "30.00", from.plusMinutes(5)),
+                        measurement(10L, "50.00", from.plusMinutes(30)),
+                        measurement(10L, "60.00", from.plusHours(1).plusMinutes(10))
+                ));
+
+        List<HourlyQuietnessResponse> responses =
+                service.getHourlyStatistics(1L, 10L, from, to);
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).averageDecibel()).isEqualByComparingTo("40.00");
+        assertThat(responses.get(0).minimumDecibel()).isEqualByComparingTo("30.00");
+        assertThat(responses.get(0).maximumDecibel()).isEqualByComparingTo("50.00");
+        assertThat(responses.get(0).sampleCount()).isEqualTo(2);
+        assertThat(responses.get(0).level()).isEqualTo(QuietnessLevel.NORMAL);
+    }
+
     private NoiseMeasurement measurement(Long spaceId, String decibel) {
-        return new NoiseMeasurement(null, 1L, spaceId, new BigDecimal(decibel), measuredAt);
+        return measurement(spaceId, decibel, measuredAt);
+    }
+
+    private NoiseMeasurement measurement(Long spaceId, String decibel, LocalDateTime time) {
+        return new NoiseMeasurement(null, 1L, spaceId, new BigDecimal(decibel), time);
     }
 
     private QuietnessThreshold threshold(

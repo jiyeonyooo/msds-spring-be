@@ -77,6 +77,14 @@ public class NoiseDevice {
         this.installedAt = LocalDateTime.now();
     }
 
+    public void updateStatus(NoiseDeviceStatus status) {
+        this.status = status;
+    }
+
+    public void markConnected(LocalDateTime connectedAt) {
+        this.lastConnectedAt = connectedAt;
+    }
+
     @PrePersist
     private void onCreate() {
         LocalDateTime now = LocalDateTime.now();

@@ -1,6 +1,7 @@
 package com.example.meditation.quietness.controller;
 
 import com.example.meditation.quietness.dto.response.GuesthouseQuietnessSummaryResponse;
+import com.example.meditation.quietness.dto.response.HourlyQuietnessResponse;
 import com.example.meditation.quietness.dto.response.QuietnessHistoryPointResponse;
 import com.example.meditation.quietness.dto.response.QuietSpaceRecommendationResponse;
 import com.example.meditation.quietness.dto.response.SpaceQuietnessResponse;
@@ -72,6 +73,19 @@ public class QuietnessController {
         return ApiResponse.success(
                 "공간별 조용함 기록을 조회했습니다.",
                 quietnessService.getHistory(spaceId, from, to)
+        );
+    }
+
+    @GetMapping("/guesthouses/{guesthouseId}/spaces/{spaceId}/hourly")
+    public ApiResponse<List<HourlyQuietnessResponse>> getHourlyStatistics(
+            @PathVariable Long guesthouseId,
+            @PathVariable Long spaceId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
+    ) {
+        return ApiResponse.success(
+                "시간대별 조용함 통계를 조회했습니다.",
+                quietnessService.getHourlyStatistics(guesthouseId, spaceId, from, to)
         );
     }
 }

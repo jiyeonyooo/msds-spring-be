@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 "/api/quietness/guesthouses/*/summary",
                                 "/api/quietness/guesthouses/*/spaces",
                                 "/api/quietness/guesthouses/*/spaces/*",
+                                "/api/quietness/guesthouses/*/spaces/*/hourly",
                                 "/api/quietness/spaces/*/history"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

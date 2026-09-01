@@ -18,6 +18,13 @@ public interface NoiseMeasurementRepository extends JpaRepository<NoiseMeasureme
             LocalDateTime to
     );
 
+    List<NoiseMeasurement> findAllByGuesthouseIdAndSpaceIdAndMeasuredAtBetweenOrderByMeasuredAtAsc(
+            Long guesthouseId,
+            Long spaceId,
+            LocalDateTime from,
+            LocalDateTime to
+    );
+
     @Query("""
             select measurement
             from NoiseMeasurement measurement

@@ -1,6 +1,7 @@
 package com.example.meditation.quietness.service;
 
 import com.example.meditation.quietness.dto.response.GuesthouseQuietnessSummaryResponse;
+import com.example.meditation.quietness.dto.response.HourlyQuietnessResponse;
 import com.example.meditation.quietness.dto.response.QuietnessHistoryPointResponse;
 import com.example.meditation.quietness.dto.response.QuietSpaceRecommendationResponse;
 import com.example.meditation.quietness.dto.response.SpaceQuietnessResponse;
@@ -18,8 +19,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -108,8 +113,73 @@ public class QuietnessService {
                 .toList();
     }
 
+    public List<HourlyQuietnessResponse> getHourlyStatistics(
+            Long guesthouseId,
+            Long spaceId,
+            LocalDateTime from,
+            LocalDateTime to
+    ) {
+        validatePeriod(from, to);
+        List<QuietnessThreshold> thresholds = thresholds(guesthouseId);
+        Map<LocalDateTime, List<NoiseMeasurement>> measurementsByHour = measurementRepository
+                .findAllByGuesthouseIdAndSpaceIdAndMeasuredAtBetweenOrderByMeasuredAtAsc(
+                        guesthouseId,
+                        spaceId,
+                        from,
+                        to
+                )
+                .stream()
+                .collect(Collectors.groupingBy(
+                        measurement -> measurement.getMeasuredAt().truncatedTo(ChronoUnit.HOURS),
+                        TreeMap::new,
+                        Collectors.toList()
+                ));
+
+        return measurementsByHour.entrySet().stream()
+                .map(entry -> toHourlyResponse(entry.getKey(), entry.getValue(), thresholds))
+                .toList();
+    }
+
     private QuietnessLevel resolveLevel(Long guesthouseId, BigDecimal decibel) {
         return resolveLevel(thresholds(guesthouseId), decibel);
+    }
+
+    private HourlyQuietnessResponse toHourlyResponse(
+            LocalDateTime hourStart,
+            List<NoiseMeasurement> measurements,
+            List<QuietnessThreshold> thresholds
+    ) {
+        BigDecimal total = measurements.stream()
+                .map(NoiseMeasurement::getDecibel)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal average = total.divide(
+                BigDecimal.valueOf(measurements.size()),
+                2,
+                RoundingMode.HALF_UP
+        );
+        BigDecimal minimum = measurements.stream()
+                .map(NoiseMeasurement::getDecibel)
+                .min(BigDecimal::compareTo)
+                .orElseThrow();
+        BigDecimal maximum = measurements.stream()
+                .map(NoiseMeasurement::getDecibel)
+                .max(BigDecimal::compareTo)
+                .orElseThrow();
+
+        return new HourlyQuietnessResponse(
+                hourStart,
+                average,
+                minimum,
+                maximum,
+                resolveLevel(thresholds, average),
+                measurements.size()
+        );
+    }
+
+    private void validatePeriod(LocalDateTime from, LocalDateTime to) {
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("조회 시작 시각은 종료 시각보다 늦을 수 없습니다.");
+        }
     }
 
     private QuietnessLevel resolveLevel(List<QuietnessThreshold> thresholds, BigDecimal decibel) {
