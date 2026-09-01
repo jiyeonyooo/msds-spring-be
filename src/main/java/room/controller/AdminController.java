@@ -13,17 +13,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import room.dto.request.RoomCreateRequest;
 import room.dto.request.RoomUpdateRequest;
+import room.dto.request.FacilityCreateRequest;
+import room.dto.request.FacilityUpdateRequest;
+import room.dto.response.FacilityDetailResponse;
 import room.dto.response.RoomDetailResponse;
+import room.service.FacilityService;
 import room.service.RoomService;
 
 @RestController
-@RequestMapping("/api/admin/rooms")
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminController {
 
     private final RoomService roomService;
+    private final FacilityService facilityService;
 
-    @PostMapping
+    @PostMapping("/rooms")
     public ResponseEntity<ApiResponse<RoomDetailResponse>> createRoom(
             @Valid @RequestBody RoomCreateRequest request
     ) {
@@ -34,7 +39,7 @@ public class AdminController {
         );
     }
 
-    @PatchMapping("/{roomId}")
+    @PatchMapping("/rooms/{roomId}")
     public ResponseEntity<ApiResponse<RoomDetailResponse>> updateRoom(
             @PathVariable Long roomId,
             @Valid @RequestBody RoomUpdateRequest request
@@ -43,6 +48,29 @@ public class AdminController {
                 HttpStatus.OK,
                 "객실 정보 수정에 성공했습니다.",
                 roomService.updateRoom(roomId, request)
+        );
+    }
+
+    @PostMapping("/facilities")
+    public ResponseEntity<ApiResponse<FacilityDetailResponse>> createFacility(
+            @Valid @RequestBody FacilityCreateRequest request
+    ) {
+        return ApiResponse.success(
+                HttpStatus.CREATED,
+                "편의시설 등록에 성공했습니다.",
+                facilityService.createFacility(request)
+        );
+    }
+
+    @PatchMapping("/facilities/{facilityId}")
+    public ResponseEntity<ApiResponse<FacilityDetailResponse>> updateFacility(
+            @PathVariable Long facilityId,
+            @Valid @RequestBody FacilityUpdateRequest request
+    ) {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "편의시설 정보 수정에 성공했습니다.",
+                facilityService.updateFacility(facilityId, request)
         );
     }
 }
