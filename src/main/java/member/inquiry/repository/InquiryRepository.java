@@ -31,6 +31,14 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     @Query("select i from Inquiry i join fetch i.user order by i.createdAt desc")
     List<Inquiry> findAllWithUser();
 
+    // 관리자 회원 목록에서 쓰는 회원별 문의 건수. 행마다 조회하지 않도록 한 번에 묶어서 센다.
+    // 반환 각 행은 [회원 ID, 문의 건수] 형태.
+    @Query("select i.user.id, count(i) from Inquiry i where i.user.id in :userIds group by i.user.id")
+    List<Object[]> countByUserIds(@Param("userIds") List<Long> userIds);
+
+    // 회원 상세에서 쓰는 단일 회원 문의 건수.
+    long countByUserId(Long userId);
+
     // 관리자용 상태별 문의 목록 (최신순). 예: 미답변(WAITING) 문의만 조회.
     @Query("select i from Inquiry i join fetch i.user "
             + "where i.status = :status order by i.createdAt desc")

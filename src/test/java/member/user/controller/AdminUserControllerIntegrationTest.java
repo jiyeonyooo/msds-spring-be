@@ -54,10 +54,11 @@ class AdminUserControllerIntegrationTest {
                         .param("role", "USER")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content.length()").value(1))
-                .andExpect(jsonPath("$.data.content[0].email").value("member@example.com"))
-                .andExpect(jsonPath("$.data.userCount").value(1))
-                .andExpect(jsonPath("$.data.adminCount").value(1));
+                .andExpect(jsonPath("$.data.user_list.length()").value(1))
+                .andExpect(jsonPath("$.data.user_list[0].email").value("member@example.com"))
+                .andExpect(jsonPath("$.data.user_list[0].reservation_count").value(0))
+                .andExpect(jsonPath("$.data.user_list[0].inquiry_count").value(0))
+                .andExpect(jsonPath("$.data.total_elements").value(1));
 
         mockMvc.perform(get("/api/admin/users/{userId}", member.getId())
                         .header("Authorization", "Bearer " + adminToken))
