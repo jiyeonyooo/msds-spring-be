@@ -29,4 +29,6 @@ public interface ResvService {
     ResvDetailResponseDTO getAdminReservation(long resvId);
 
     ResvCancelResponseDTO cancelAdminReservation(long resvId);
+
+    ResvCancelResponseDTO restoreAdminReservation(long resvId);
 }
