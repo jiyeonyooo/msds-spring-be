@@ -31,11 +31,11 @@ public class ReviewService {
     }
 
     @Transactional
-    public Long addReview(Long memberId, @Valid ReviewCreateRequest request) {
+    public Long addReview(String email, @Valid ReviewCreateRequest request) {
         ProgramReservation reservation = reservationRepository.findById(request.programReservationId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약입니다."));
 
-        if (!reservation.getUser().getId().equals(memberId)) {
+        if (!reservation.getUser().getEmail().equals(email)) {
             throw new AccessDeniedException("본인이 참여한 예약에만 리뷰를 작성할 수 있습니다.");
         }
         if (reviewRepository.existsByProgramReservationId(reservation.getId())) {
@@ -50,12 +50,18 @@ public class ReviewService {
     }
 
     @Transactional
-    public void deleteReview(Long memberId, Long reviewId) {
+    public void deleteReview(String email, Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 리뷰입니다."));
-        if (!review.getProgramReservation().getUser().getId().equals(memberId)) {
+        if (!review.getProgramReservation().getUser().getEmail().equals(email)) {
             throw new AccessDeniedException("본인 리뷰만 삭제할 수 있습니다.");
         }
         reviewRepository.delete(review);
+    }
+
+    public List<ReviewResponse> getMyReviews(String email) {
+        return reviewRepository.findByProgramReservation_User_Email(email).stream()
+                .map(ReviewResponse::from)
+                .toList();
     }
 }
