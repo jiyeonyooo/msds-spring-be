@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -83,6 +84,17 @@ class MeditationControllerIntegrationTest {
                 .andExpect(jsonPath("$[0].id").value(program.getId()))
                 .andExpect(jsonPath("$[0].name").value("Morning Silence Meditation"))
                 .andExpect(jsonPath("$[0].remain").value(10));
+    }
+
+    @Test
+    void 로컬_프론트의_관리자_DELETE_사전_요청을_허용한다() throws Exception {
+        mockMvc.perform(options("/meditation/admin/program/{programId}", program.getId())
+                        .header("Origin", "http://127.0.0.1:5173")
+                        .header("Access-Control-Request-Method", "DELETE"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://127.0.0.1:5173"))
+                .andExpect(header().string("Access-Control-Allow-Methods",
+                        org.hamcrest.Matchers.containsString("DELETE")));
     }
 
     @Test
