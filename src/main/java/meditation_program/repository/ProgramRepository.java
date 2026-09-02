@@ -2,6 +2,7 @@ package meditation_program.repository;
 
 import jakarta.persistence.LockModeType;
 import meditation_program.entity.Program;
+import meditation_program.entity.ProgramReservation;
 import meditation_program.entity.ProgramStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

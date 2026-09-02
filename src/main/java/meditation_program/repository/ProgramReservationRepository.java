@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ProgramReservationRepository extends JpaRepository<ProgramReservation, Long> {
     List<ProgramReservation> findByUserIdAndStatus(Long userId, ReservationStatus status);
+    List<ProgramReservation> findByUser_Email(String email);
 }

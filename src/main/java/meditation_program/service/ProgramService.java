@@ -7,11 +7,13 @@ import lombok.Setter;
 import meditation_program.dto.ProgramCreateRequest;
 import meditation_program.dto.ProgramResponse;
 import meditation_program.dto.ReservationRequest;
+import meditation_program.dto.ReservationResponse;
 import meditation_program.entity.Program;
 import meditation_program.entity.ProgramReservation;
 import meditation_program.entity.ProgramStatus;
 import meditation_program.repository.ProgramRepository;
 import meditation_program.repository.ProgramReservationRepository;
+import meditation_program.repository.ReviewRepository;
 import member.user.domain.User;
 import member.user.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,6 +31,7 @@ public class ProgramService {
     private final ProgramRepository programRepository;
     private final ProgramReservationRepository reservationRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     public List<ProgramResponse> getPrograms() {
         return programRepository.findByStatusNot(ProgramStatus.DELETED).stream()
@@ -80,5 +83,11 @@ public class ProgramService {
         Program program = programRepository.findById(programId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
         program.softDelete();
+    }
+
+    public List<ReservationResponse> getMyReservations(String email) {
+        return reservationRepository.findByUser_Email(email).stream()
+                .map(r -> ReservationResponse.from(r, reviewRepository.existsByProgramReservationId(r.getId())))
+                .toList();
     }
 }
