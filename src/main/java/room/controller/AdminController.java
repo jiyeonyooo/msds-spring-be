@@ -51,6 +51,26 @@ public class AdminController {
         );
     }
 
+    @GetMapping("/facilities")
+    public ResponseEntity<ApiResponse<List<FacilityDetailResponse>>> getFacilities() {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "전체 편의시설 목록 조회에 성공했습니다.",
+                facilityService.getAllFacilities()
+        );
+    }
+
+    @GetMapping("/facilities/{facilityId}")
+    public ResponseEntity<ApiResponse<FacilityDetailResponse>> getFacility(
+            @PathVariable Long facilityId
+    ) {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "편의시설 상세 조회에 성공했습니다.",
+                facilityService.getFacility(facilityId)
+        );
+    }
+
     @PostMapping("/rooms")
     public ResponseEntity<ApiResponse<RoomDetailResponse>> createRoom(
             @Valid @RequestBody RoomCreateRequest request
@@ -103,26 +123,6 @@ public class AdminController {
                 HttpStatus.CREATED,
                 "편의시설 등록에 성공했습니다.",
                 facilityService.createFacility(request)
-        );
-    }
-
-    @GetMapping("/facilities")
-    public ResponseEntity<ApiResponse<List<FacilityDetailResponse>>> getFacilities() {
-        return ApiResponse.success(
-                HttpStatus.OK,
-                "관리자 편의시설 목록 조회에 성공했습니다.",
-                facilityService.getFacilitiesForAdmin()
-        );
-    }
-
-    @GetMapping("/facilities/{facilityId}")
-    public ResponseEntity<ApiResponse<FacilityDetailResponse>> getFacility(
-            @PathVariable Long facilityId
-    ) {
-        return ApiResponse.success(
-                HttpStatus.OK,
-                "관리자 편의시설 상세 조회에 성공했습니다.",
-                facilityService.getFacility(facilityId)
         );
     }
 
