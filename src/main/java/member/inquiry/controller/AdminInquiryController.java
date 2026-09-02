@@ -42,7 +42,18 @@ public class AdminInquiryController {
         return ResponseEntity.ok(ApiResponse.success("문의 목록 조회에 성공했습니다.", responses));
     }
 
-    // 2. 문의 답변 등록 - PATCH /api/admin/inquiries/{inquiryId}/answer
+    // 2. 문의 상세 조회 - GET /api/admin/inquiries/{inquiryId}
+    @GetMapping("/{inquiryId}")
+    public ResponseEntity<ApiResponse<InquiryResponse>> getInquiryDetail(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long inquiryId) {
+
+        String adminEmail = userDetails.getUsername();
+        InquiryResponse response = inquiryService.getInquiryDetailForAdmin(adminEmail, inquiryId);
+        return ResponseEntity.ok(ApiResponse.success("문의 상세 조회에 성공했습니다.", response));
+    }
+
+    // 3. 문의 답변 등록 - PATCH /api/admin/inquiries/{inquiryId}/answer
     @PatchMapping("/{inquiryId}/answer")
     public ResponseEntity<ApiResponse<InquiryResponse>> answerInquiry(
             @AuthenticationPrincipal UserDetails userDetails,

@@ -22,6 +22,11 @@ public enum MemberErrorCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     ADMIN_ONLY(HttpStatus.FORBIDDEN, "관리자 권한이 없습니다."),
 
+    // 관리자 회원 관리
+    INVALID_ROLE(HttpStatus.BAD_REQUEST, "권한 값은 USER 또는 ADMIN만 가능합니다."),
+    CANNOT_CHANGE_OWN_ROLE(HttpStatus.BAD_REQUEST, "본인 계정의 권한은 변경할 수 없습니다."),
+    LAST_ADMIN_CANNOT_BE_DEMOTED(HttpStatus.BAD_REQUEST, "마지막 관리자 계정은 일반 회원으로 변경할 수 없습니다."),
+
     // 문의
     INQUIRY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 문의입니다."),
     INQUIRY_FORBIDDEN(HttpStatus.FORBIDDEN, "본인이 작성한 문의만 조회할 수 있습니다."),
