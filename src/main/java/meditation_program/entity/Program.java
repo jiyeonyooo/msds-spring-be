@@ -73,4 +73,8 @@ public class Program {
         this.pictureUrl = pictureUrl;
         this.capacity = capacity;
     }
+
+    public void softDelete() {
+        this.status = ProgramStatus.DELETED;
+    }
 }
