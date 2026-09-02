@@ -36,4 +36,10 @@ public class AdminResvController {
             @PathVariable @Positive(message = "예약 ID는 1 이상의 값이어야 합니다.") long resvId) {
         return ResponseEntity.ok(ApiResponse.success("예약이 성공적으로 취소되었습니다.", resvService.cancelAdminReservation(resvId)));
     }
+
+    @PatchMapping("/{resvId}/restore")
+    public ResponseEntity<ApiResponse<ResvCancelResponseDTO>> restoreReservation(
+            @PathVariable @Positive(message = "예약 ID는 1 이상의 값이어야 합니다.") long resvId) {
+        return ResponseEntity.ok(ApiResponse.success("예약이 복구되었습니다.", resvService.restoreAdminReservation(resvId)));
+    }
 }

@@ -138,6 +138,25 @@ public class ResvServiceImpl implements ResvService {
         return cancel(findReservation(resvId));
     }
 
+    @Override
+    @Transactional
+    public ResvCancelResponseDTO restoreAdminReservation(long resvId) {
+        Resv resv = findReservation(resvId);
+        if (resv.getResvStatus() != ResvStatus.CANCELLED) {
+            throw new ResvException(ResvErrorCode.RESV_CANNOT_RESTORE);
+        }
+
+        boolean available = resvRoomUnitRepository.findAvailableByIdForUpdate(
+                resv.getRoomUnitsId(), resv.getCheckInDate(), resv.getCheckOutDate(),
+                RoomUnitStatus.ACTIVE, ResvStatus.RESERVED).isPresent();
+        if (!available) {
+            throw new ResvException(ResvErrorCode.ROOM_NOT_AVAILABLE);
+        }
+
+        resv.restore();
+        return new ResvCancelResponseDTO(resv.getResvId(), resv.getResvNumber(), resv.getResvStatus().name(), resv.getCancelledAt());
+    }
+
     private ResvCancelResponseDTO cancel(Resv resv) {
         LocalDateTime now = LocalDateTime.now(resvClock);
         if (resv.getResvStatus() != ResvStatus.RESERVED || !LocalDate.now(resvClock).isBefore(resv.getCheckInDate())) {
