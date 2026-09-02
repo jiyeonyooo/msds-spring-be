@@ -22,6 +22,12 @@ public class FacilityService {
 
     private final FacilityRepository facilityRepository;
 
+    public List<FacilityDetailResponse> getAllFacilities() {
+        return facilityRepository.findAll().stream()
+                .map(this::toDetailResponse)
+                .toList();
+    }
+
     public List<FacilitySummaryResponse> getFacilities(FacilityCategory category) {
         List<Facility> facilities = category == null
                 ? facilityRepository.findAllByActiveTrueOrderByCategoryAscNameAsc()
@@ -30,6 +36,16 @@ public class FacilityService {
         return facilities.stream()
                 .map(this::toSummaryResponse)
                 .toList();
+    }
+
+    public FacilityDetailResponse getFacility(Long facilityId) {
+        Facility facility = facilityRepository.findById(facilityId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Facility not found: " + facilityId
+                ));
+
+        return toDetailResponse(facility);
     }
 
     @Transactional

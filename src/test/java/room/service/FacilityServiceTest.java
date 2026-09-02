@@ -16,6 +16,7 @@ import room.entity.enums.FacilityCategory;
 import room.repository.FacilityRepository;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -32,6 +33,48 @@ class FacilityServiceTest {
 
     @InjectMocks
     private FacilityService facilityService;
+
+    @Test
+    void getsAllFacilitiesIncludingInactiveFacilities() {
+        Facility activeFacility = facility(
+                1L, "Meditation Room", FacilityCategory.WELLNESS, true
+        );
+        Facility inactiveFacility = facility(
+                2L, "Old Lounge", FacilityCategory.FOOD, false
+        );
+        given(facilityRepository.findAll())
+                .willReturn(List.of(activeFacility, inactiveFacility));
+
+        List<FacilityDetailResponse> responses = facilityService.getAllFacilities();
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses)
+                .extracting(FacilityDetailResponse::active)
+                .containsExactly(true, false);
+    }
+
+    @Test
+    void getsFacilityDetail() {
+        Facility facility = facility(1L, "Meditation Room", FacilityCategory.WELLNESS, true);
+        given(facilityRepository.findById(1L)).willReturn(Optional.of(facility));
+
+        FacilityDetailResponse response = facilityService.getFacility(1L);
+
+        assertThat(response.facilityId()).isEqualTo(1L);
+        assertThat(response.name()).isEqualTo("Meditation Room");
+        assertThat(response.category()).isEqualTo(FacilityCategory.WELLNESS);
+        assertThat(response.active()).isTrue();
+    }
+
+    @Test
+    void returnsNotFoundWhenGettingMissingFacility() {
+        given(facilityRepository.findById(99L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> facilityService.getFacility(99L))
+                .isInstanceOfSatisfying(ResponseStatusException.class, exception ->
+                        assertThat(exception.getStatusCode().value())
+                                .isEqualTo(HttpStatus.NOT_FOUND.value()));
+    }
 
     @Test
     void createsFacilityWithActiveDefaultingToTrue() {

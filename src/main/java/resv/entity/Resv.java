@@ -98,4 +98,9 @@ public class Resv {
         this.resvStatus = ResvStatus.CANCELLED;
         this.cancelledAt = cancelledAt;
     }
+
+    public void restore() {
+        this.resvStatus = ResvStatus.RESERVED;
+        this.cancelledAt = null;
+    }
 }
