@@ -4,9 +4,11 @@ import com.example.meditation.quietness.dto.request.NoiseDeviceCreateRequest;
 import com.example.meditation.quietness.dto.request.NoiseDeviceStatusUpdateRequest;
 import com.example.meditation.quietness.dto.request.NoiseMeasurementCreateRequest;
 import com.example.meditation.quietness.dto.request.QuietSpaceCreateRequest;
+import com.example.meditation.quietness.dto.request.QuietnessThresholdUpdateRequest;
 import com.example.meditation.quietness.dto.response.NoiseDeviceResponse;
 import com.example.meditation.quietness.dto.response.NoiseMeasurementResponse;
 import com.example.meditation.quietness.dto.response.QuietSpaceResponse;
+import com.example.meditation.quietness.dto.response.QuietnessThresholdResponse;
 import com.example.meditation.quietness.entity.NoiseDevice;
 import com.example.meditation.quietness.entity.NoiseDeviceStatus;
 import com.example.meditation.quietness.entity.NoiseMeasurement;
@@ -58,6 +60,19 @@ public class QuietnessAdminService {
         return deviceRepository.findAllByGuesthouseId(guesthouseId).stream()
                 .map(this::toDeviceResponse)
                 .toList();
+    }
+
+    @Transactional
+    public List<QuietnessThresholdResponse> getThresholds(Long guesthouseId) {
+        return thresholdService.getThresholds(guesthouseId);
+    }
+
+    @Transactional
+    public List<QuietnessThresholdResponse> updateThresholds(
+            Long guesthouseId,
+            QuietnessThresholdUpdateRequest request
+    ) {
+        return thresholdService.updateThresholds(guesthouseId, request);
     }
 
     @Transactional

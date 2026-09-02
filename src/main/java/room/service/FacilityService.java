@@ -44,7 +44,6 @@ public class FacilityService {
                         HttpStatus.NOT_FOUND,
                         "Facility not found: " + facilityId
                 ));
-
         return toDetailResponse(facility);
     }
 

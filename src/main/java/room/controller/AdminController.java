@@ -5,19 +5,21 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import room.dto.request.RoomCreateRequest;
+import room.dto.request.RoomEquipmentsUpdateRequest;
 import room.dto.request.RoomUpdateRequest;
 import room.dto.request.FacilityCreateRequest;
 import room.dto.request.FacilityUpdateRequest;
 import room.dto.response.FacilityDetailResponse;
 import room.dto.response.RoomDetailResponse;
+import room.dto.response.RoomEquipmentOptionResponse;
 import room.service.FacilityService;
 import room.service.RoomService;
 
@@ -30,6 +32,24 @@ public class AdminController {
 
     private final RoomService roomService;
     private final FacilityService facilityService;
+
+    @GetMapping("/rooms")
+    public ResponseEntity<ApiResponse<List<RoomDetailResponse>>> getRooms() {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "관리자 객실 목록 조회에 성공했습니다.",
+                roomService.getRoomsForAdmin()
+        );
+    }
+
+    @GetMapping("/rooms/{roomId}")
+    public ResponseEntity<ApiResponse<RoomDetailResponse>> getRoom(@PathVariable Long roomId) {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "관리자 객실 상세 조회에 성공했습니다.",
+                roomService.getRoom(roomId)
+        );
+    }
 
     @GetMapping("/facilities")
     public ResponseEntity<ApiResponse<List<FacilityDetailResponse>>> getFacilities() {
@@ -71,6 +91,27 @@ public class AdminController {
                 HttpStatus.OK,
                 "객실 정보 수정에 성공했습니다.",
                 roomService.updateRoom(roomId, request)
+        );
+    }
+
+    @GetMapping("/room-equipments")
+    public ResponseEntity<ApiResponse<List<RoomEquipmentOptionResponse>>> getRoomEquipments() {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "객실 비품 목록 조회에 성공했습니다.",
+                roomService.getEquipmentOptions()
+        );
+    }
+
+    @PatchMapping("/rooms/{roomId}/equipments")
+    public ResponseEntity<ApiResponse<RoomDetailResponse>> updateRoomEquipments(
+            @PathVariable Long roomId,
+            @Valid @RequestBody RoomEquipmentsUpdateRequest request
+    ) {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "객실 비품 수정에 성공했습니다.",
+                roomService.updateRoomEquipments(roomId, request)
         );
     }
 

@@ -10,4 +10,6 @@ public interface WellnessAnswerRepository extends JpaRepository<WellnessAnswer, 
     List<WellnessAnswer> findAllByWellnessCheckOrderByWellnessQuestionDisplayOrderAsc(
             WellnessCheck wellnessCheck
     );
+
+    List<WellnessAnswer> findAllByWellnessCheckIn(List<WellnessCheck> wellnessChecks);
 }

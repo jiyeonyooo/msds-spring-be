@@ -33,6 +33,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RoomEquipmentMapping {
 
+    public static RoomEquipmentMapping create(
+            Room room,
+            RoomEquipment equipment,
+            Integer quantity,
+            String note
+    ) {
+        RoomEquipmentMapping mapping = new RoomEquipmentMapping();
+        mapping.room = room;
+        mapping.equipment = equipment;
+        mapping.quantity = quantity;
+        mapping.note = note;
+        return mapping;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -1,10 +1,10 @@
 package resv.repository;
 
+import com.example.meditation.MeditationApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.persistence.autoconfigure.EntityScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ContextConfiguration;
 import resv.entity.Resv;
 import resv.enums.ResvStatus;
 
@@ -13,8 +13,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@EntityScan(basePackages = "resv.entity")
-@EnableJpaRepositories(basePackages = "resv.repository")
+@ContextConfiguration(classes = MeditationApplication.class)
 class ResvRepositoryTest {
 
     @Autowired

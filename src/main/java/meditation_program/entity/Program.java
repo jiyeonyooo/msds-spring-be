@@ -69,9 +69,15 @@ public class Program {
     }
 
     public void updateInfo(String name, String pictureUrl, Integer capacity) {
+        int reserved = this.capacity - this.remain;
+        if (capacity < reserved) {
+            throw new IllegalArgumentException("현재 신청 인원보다 정원을 작게 변경할 수 없습니다.");
+        }
         this.name = name;
         this.pictureUrl = pictureUrl;
         this.capacity = capacity;
+        this.remain = capacity - reserved;
+        this.status = this.remain == 0 ? ProgramStatus.CLOSED : ProgramStatus.OPEN;
     }
 
     public void softDelete() {
