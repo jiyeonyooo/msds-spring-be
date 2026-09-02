@@ -3,6 +3,7 @@ package meditation_program.controller;
 import com.example.meditation.MeditationApplication;
 import meditation_program.entity.Program;
 import meditation_program.repository.ProgramRepository;
+import meditation_program.repository.ProgramReservationRepository;
 import member.auth.service.JwtTokenProvider;
 import member.user.domain.User;
 import member.user.repository.UserRepository;
@@ -44,6 +45,9 @@ class MeditationControllerIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ProgramReservationRepository programReservationRepository;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -217,5 +221,31 @@ class MeditationControllerIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("신청 내역이 있는 프로그램은 삭제할 수 없습니다."));
+    }
+
+    @Test
+    void 프로그램_후기_응답에_예약자와_예약_식별자를_포함한다() throws Exception {
+        String token = jwtTokenProvider.createToken("member@example.com", "USER");
+
+        mockMvc.perform(post("/meditation/program")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"programId\":" + program.getId() + ",\"quantity\":1}"))
+                .andExpect(status().isCreated());
+
+        Long reservationId = programReservationRepository.findAll().get(0).getId();
+        mockMvc.perform(post("/meditation/review")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"programReservationId\":" + reservationId +
+                                ",\"content\":\"고요하고 편안했습니다.\"}"))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/meditation/review"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].programReservationId").value(reservationId))
+                .andExpect(jsonPath("$[0].userId").isNumber())
+                .andExpect(jsonPath("$[0].userName").value("테스트 회원"))
+                .andExpect(jsonPath("$[0].content").value("고요하고 편안했습니다."));
     }
 }
