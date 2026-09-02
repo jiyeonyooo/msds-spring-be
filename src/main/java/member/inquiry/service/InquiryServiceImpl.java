@@ -80,6 +80,14 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
+    public InquiryResponse getInquiryDetailForAdmin(String adminEmail, Long inquiryId) {
+        validateAdmin(adminEmail);
+
+        // 관리자는 작성자 소유 여부와 상관없이 모든 문의를 열람할 수 있다.
+        return InquiryResponse.from(findInquiryById(inquiryId));
+    }
+
+    @Override
     @Transactional
     public InquiryResponse answerInquiry(String adminEmail, Long inquiryId, InquiryAnswerRequest request) {
         validateAdmin(adminEmail);
