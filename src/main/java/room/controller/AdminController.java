@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,8 @@ import room.dto.response.RoomDetailResponse;
 import room.service.FacilityService;
 import room.service.RoomService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -27,6 +30,26 @@ public class AdminController {
 
     private final RoomService roomService;
     private final FacilityService facilityService;
+
+    @GetMapping("/facilities")
+    public ResponseEntity<ApiResponse<List<FacilityDetailResponse>>> getFacilities() {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "전체 편의시설 목록 조회에 성공했습니다.",
+                facilityService.getAllFacilities()
+        );
+    }
+
+    @GetMapping("/facilities/{facilityId}")
+    public ResponseEntity<ApiResponse<FacilityDetailResponse>> getFacility(
+            @PathVariable Long facilityId
+    ) {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "편의시설 상세 조회에 성공했습니다.",
+                facilityService.getFacility(facilityId)
+        );
+    }
 
     @PostMapping("/rooms")
     public ResponseEntity<ApiResponse<RoomDetailResponse>> createRoom(
