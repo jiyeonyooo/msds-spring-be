@@ -33,6 +33,17 @@ public class MeditationController {
         return ResponseEntity.created(URI.create("/meditation/program/reservation/" + reservationId)).build();
     }
 
+    @GetMapping("/program/detail/{programId}")
+    public ProgramResponse programDetail(@PathVariable Long programId) {
+        return programService.getProgram(programId);
+    }
+
+    @GetMapping("/program/reservations")
+    public List<ProgramReservationResponse> myProgramReservations(
+            @AuthenticationPrincipal UserDetails principal) {
+        return programService.getMyReservations(principal.getUsername());
+    }
+
     @DeleteMapping("/program/reservation/{reservationId}")
     public ResponseEntity<Void> cancelReservation(@AuthenticationPrincipal UserDetails principal,
                                                   @PathVariable Long reservationId) {
@@ -70,5 +81,17 @@ public class MeditationController {
     public ResponseEntity<Void> deleteProgram(@PathVariable Long programId) {
         programService.deleteProgram(programId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/admin/program/{programId}")
+    public ResponseEntity<Void> updateProgram(@PathVariable Long programId,
+                                              @RequestBody @Valid ProgramUpdateRequest request) {
+        programService.updateProgram(programId, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/admin/program/{programId}/applications")
+    public List<ProgramApplicationResponse> programApplications(@PathVariable Long programId) {
+        return programService.getApplications(programId);
     }
 }

@@ -56,7 +56,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/wellness/questions", "/api/wellness/guest/**").permitAll()
                         .requestMatchers("/api/rooms", "/api/rooms/**", "/api/facilities", "/api/facilities/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/meditation/program", "/meditation/review").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/meditation/program", "/meditation/program/detail/*", "/meditation/review").permitAll()
+                        .requestMatchers("/meditation/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,
                                 "/api/quietness/guesthouses/*/summary",
                                 "/api/quietness/guesthouses/*/spaces",

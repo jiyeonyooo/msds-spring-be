@@ -1,6 +1,7 @@
 package meditation_program.service;
 
 import meditation_program.dto.ReservationRequest;
+import meditation_program.dto.ProgramUpdateRequest;
 import meditation_program.entity.Program;
 import meditation_program.entity.ProgramReservation;
 import meditation_program.repository.ProgramRepository;
@@ -56,6 +57,33 @@ class ProgramServiceTest {
         assertThatThrownBy(() -> service.cancelReservation("other@example.com", 9L))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("본인 예약만 취소할 수 있습니다.");
+    }
+
+    @Test
+    void 프로그램_수정시_기존_신청_인원을_제외한_잔여_인원을_계산한다() {
+        Program program = Program.builder().name("Morning Silence").capacity(10).build();
+        program.reserve(3);
+        when(programRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(program));
+
+        service.updateProgram(1L, new ProgramUpdateRequest("Updated Silence", null, 12));
+
+        assertThat(program.getName()).isEqualTo("Updated Silence");
+        assertThat(program.getCapacity()).isEqualTo(12);
+        assertThat(program.getRemain()).isEqualTo(9);
+    }
+
+    @Test
+    void 현재_신청_인원보다_정원을_작게_수정할_수_없다() {
+        Program program = Program.builder().name("Morning Silence").capacity(10).build();
+        program.reserve(3);
+        when(programRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(program));
+
+        assertThatThrownBy(() -> service.updateProgram(
+                1L,
+                new ProgramUpdateRequest("Updated Silence", null, 2)
+        ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("현재 신청 인원보다 정원을 작게 변경할 수 없습니다.");
     }
 
     private User member(String email) {
