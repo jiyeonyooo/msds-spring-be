@@ -21,6 +21,9 @@ public interface InquiryService {
     // 전체 문의 목록 조회 (관리자 전용). status가 null이면 전체, 아니면 해당 상태만 조회.
     List<InquiryResponse> getAllInquiriesForAdmin(String adminEmail, InquiryStatus status);
 
+    // 문의 상세 조회 (관리자 전용)
+    InquiryResponse getInquiryDetailForAdmin(String adminEmail, Long inquiryId);
+
     // 문의 답변 등록 (관리자 전용)
     InquiryResponse answerInquiry(String adminEmail, Long inquiryId, InquiryAnswerRequest request);
 }

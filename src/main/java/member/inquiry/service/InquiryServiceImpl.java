@@ -80,6 +80,12 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
+    public InquiryResponse getInquiryDetailForAdmin(String adminEmail, Long inquiryId) {
+        validateAdmin(adminEmail);
+        return InquiryResponse.from(findInquiryById(inquiryId));
+    }
+
+    @Override
     @Transactional
     public InquiryResponse answerInquiry(String adminEmail, Long inquiryId, InquiryAnswerRequest request) {
         validateAdmin(adminEmail);

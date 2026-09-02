@@ -137,6 +137,22 @@ class InquiryServiceImplTest {
     }
 
     @Test
+    @DisplayName("관리자는 문의 상세를 조회할 수 있다")
+    void getInquiryDetailForAdmin_success() {
+        User admin = buildUser(1L, "admin@example.com", "ADMIN");
+        User writer = buildUser(2L, "user@example.com", "USER");
+        Inquiry inquiry = buildInquiry(10L, writer);
+
+        given(userRepository.findByEmail("admin@example.com")).willReturn(Optional.of(admin));
+        given(inquiryRepository.findByIdWithUser(10L)).willReturn(Optional.of(inquiry));
+
+        InquiryResponse response = inquiryService.getInquiryDetailForAdmin("admin@example.com", 10L);
+
+        assertThat(response.getInquiryId()).isEqualTo(10L);
+        assertThat(response.getAuthorEmail()).isEqualTo("user@example.com");
+    }
+
+    @Test
     @DisplayName("내 문의 목록은 작성자까지 함께 조회(join fetch)하는 쿼리로 가져온다")
     void getMyInquiries_success() {
         User user = buildUser(1L, "user@example.com", "USER");
