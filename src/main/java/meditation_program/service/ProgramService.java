@@ -36,10 +36,10 @@ public class ProgramService {
     }
 
     @Transactional
-    public Long reserve(Long userId, ReservationRequest request) {
+    public Long reserve(String userEmail, ReservationRequest request) {
         Program program = programRepository.findByIdForUpdate(request.programId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
         program.reserve(request.quantity()); // 재고 부족이면 여기서 예외
@@ -51,11 +51,11 @@ public class ProgramService {
     }
 
     @Transactional
-    public void cancelReservation(Long userId, Long reservationId) {
+    public void cancelReservation(String userEmail, Long reservationId) {
         ProgramReservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약입니다."));
-        if (!reservation.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("본인 리뷰만 삭제할 수 있습니다.");
+        if (!reservation.getUser().getEmail().equalsIgnoreCase(userEmail)) {
+            throw new AccessDeniedException("본인 예약만 취소할 수 있습니다.");
         }
         reservation.cancel();
         reservation.getProgram().cancelReservation(reservation.getQuantity());

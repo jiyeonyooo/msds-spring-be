@@ -7,6 +7,7 @@ import meditation_program.service.ProgramService;
 import meditation_program.service.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -26,20 +27,16 @@ public class MeditationController {
     }
 
     @PostMapping("/program")
-    // TODO: 인증 붙이면 @AuthenticationPrincipal로 원복 필요
-    public ResponseEntity<Void> reserveProgram(//@AuthenticationPrincipal Long userId,
-                                               @RequestParam Long userId,
+    public ResponseEntity<Void> reserveProgram(@AuthenticationPrincipal UserDetails principal,
                                                @RequestBody @Valid ReservationRequest request) {
-        Long reservationId = programService.reserve(userId, request);
+        Long reservationId = programService.reserve(principal.getUsername(), request);
         return ResponseEntity.created(URI.create("/meditation/program/reservation/" + reservationId)).build();
     }
 
     @DeleteMapping("/program/reservation/{reservationId}")
-    // TODO: 인증 붙이면 @AuthenticationPrincipal로 원복 필요
-    public ResponseEntity<Void> cancelReservation(//@AuthenticationPrincipal Long userId,
-                                                  @RequestParam Long userId,
+    public ResponseEntity<Void> cancelReservation(@AuthenticationPrincipal UserDetails principal,
                                                   @PathVariable Long reservationId) {
-        programService.cancelReservation(userId, reservationId);
+        programService.cancelReservation(principal.getUsername(), reservationId);
         return ResponseEntity.noContent().build();
     }
 
@@ -49,20 +46,16 @@ public class MeditationController {
     }
 
     @PostMapping("/review")
-    // TODO: 인증 붙이면 @AuthenticationPrincipal로 원복 필요
-    public ResponseEntity<Void> addReview(//@AuthenticationPrincipal Long userId,
-                                          @RequestParam Long userId,
+    public ResponseEntity<Void> addReview(@AuthenticationPrincipal UserDetails principal,
                                           @RequestBody @Valid ReviewCreateRequest request) {
-        Long reviewId = reviewService.addReview(userId, request);
+        Long reviewId = reviewService.addReview(principal.getUsername(), request);
         return ResponseEntity.created(URI.create("/meditation/review/" + reviewId)).build();
     }
 
     @DeleteMapping("/review/{reviewId}")
-    // TODO: 인증 붙이면 @AuthenticationPrincipal로 원복 필요
-    public ResponseEntity<Void> deleteReview(//@AuthenticationPrincipal Long userId,
-                                             @RequestParam Long userId,
+    public ResponseEntity<Void> deleteReview(@AuthenticationPrincipal UserDetails principal,
                                              @PathVariable Long reviewId) {
-        reviewService.deleteReview(userId, reviewId);
+        reviewService.deleteReview(principal.getUsername(), reviewId);
         return ResponseEntity.noContent().build();
     }
 
