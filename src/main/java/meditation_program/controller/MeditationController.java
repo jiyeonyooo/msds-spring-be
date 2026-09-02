@@ -94,4 +94,9 @@ public class MeditationController {
     public List<ProgramApplicationResponse> programApplications(@PathVariable Long programId) {
         return programService.getApplications(programId);
     }
+
+    @GetMapping("/review/me")
+    public List<ReviewResponse> myReviews(@AuthenticationPrincipal UserDetails userDetails) {
+        return reviewService.getMyReviews(userDetails.getUsername());
+    }
 }

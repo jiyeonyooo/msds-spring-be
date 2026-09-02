@@ -12,6 +12,7 @@ import meditation_program.dto.ProgramUpdateRequest;
 import meditation_program.dto.ReservationRequest;
 import meditation_program.entity.Program;
 import meditation_program.entity.ProgramReservation;
+import meditation_program.entity.ProgramStatus;
 import meditation_program.repository.ProgramRepository;
 import meditation_program.repository.ProgramReservationRepository;
 import member.user.domain.User;
@@ -33,7 +34,7 @@ public class ProgramService {
     private final UserRepository userRepository;
 
     public List<ProgramResponse> getPrograms() {
-        return programRepository.findAll().stream()
+        return programRepository.findByStatusNot(ProgramStatus.DELETED).stream()
                 .map(ProgramResponse::from)
                 .toList();
     }
@@ -66,7 +67,7 @@ public class ProgramService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
-        program.reserve(request.quantity()); // 재고 부족이면 여기서 예외
+        program.reserve(request.quantity());
 
         ProgramReservation reservation = ProgramReservation.builder()
                 .program(program).user(user).quantity(request.quantity())
@@ -105,12 +106,11 @@ public class ProgramService {
 
     @Transactional
     public void deleteProgram(Long programId) {
-        if (!programRepository.existsById(programId)) {
-            throw new NoSuchElementException("존재하지 않는 프로그램입니다.");
-        }
+        Program program = programRepository.findById(programId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
         if (reservationRepository.existsByProgramId(programId)) {
             throw new IllegalStateException("신청 내역이 있는 프로그램은 삭제할 수 없습니다.");
         }
-        programRepository.deleteById(programId);
+        program.softDelete();
     }
 }

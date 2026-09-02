@@ -74,6 +74,9 @@ public class SecurityConfig {
                                 "/api/quietness/spaces/*/history"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/meditation/program", "/meditation/review").permitAll()
+                        .requestMatchers("/meditation/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/meditation/program", "/meditation/review").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

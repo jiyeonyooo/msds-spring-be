@@ -57,6 +57,47 @@ class ResvServiceImplTest {
         assertThat(reservation.getResvStatus()).isEqualTo(ResvStatus.RESERVED);
     }
 
+    @Test
+    void adminRestoreRestoresCancelledReservationWhenRoomUnitIsAvailable() {
+        Resv reservation = reservation(LocalDate.of(2026, 9, 10));
+        reservation.cancel(java.time.LocalDateTime.of(2026, 9, 1, 12, 0));
+        ResvRepository repository = mock(ResvRepository.class);
+        ResvRoomUnitRepository roomUnitRepository = mock(ResvRoomUnitRepository.class);
+        when(repository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(roomUnitRepository.findAvailableByIdForUpdate(
+                101L, reservation.getCheckInDate(), reservation.getCheckOutDate(),
+                room.entity.enums.RoomUnitStatus.ACTIVE, ResvStatus.RESERVED))
+                .thenReturn(Optional.of(mock(room.entity.RoomUnit.class)));
+
+        ResvServiceImpl service = new ResvServiceImpl(mock(EntityManager.class), repository, roomUnitRepository, Clock.system(KOREA));
+
+        ResvCancelResponseDTO response = service.restoreAdminReservation(1L);
+
+        assertThat(response.resvStatus()).isEqualTo("RESERVED");
+        assertThat(response.cancelledAt()).isNull();
+        assertThat(reservation.getResvStatus()).isEqualTo(ResvStatus.RESERVED);
+    }
+
+    @Test
+    void adminRestoreRejectsUnavailableRoomUnit() {
+        Resv reservation = reservation(LocalDate.of(2026, 9, 10));
+        reservation.cancel(java.time.LocalDateTime.of(2026, 9, 1, 12, 0));
+        ResvRepository repository = mock(ResvRepository.class);
+        ResvRoomUnitRepository roomUnitRepository = mock(ResvRoomUnitRepository.class);
+        when(repository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(roomUnitRepository.findAvailableByIdForUpdate(
+                101L, reservation.getCheckInDate(), reservation.getCheckOutDate(),
+                room.entity.enums.RoomUnitStatus.ACTIVE, ResvStatus.RESERVED))
+                .thenReturn(Optional.empty());
+
+        ResvServiceImpl service = new ResvServiceImpl(mock(EntityManager.class), repository, roomUnitRepository, Clock.system(KOREA));
+
+        assertThatThrownBy(() -> service.restoreAdminReservation(1L))
+                .isInstanceOf(ResvException.class)
+                .extracting(exception -> ((ResvException) exception).getErrorCode().name())
+                .isEqualTo("ROOM_NOT_AVAILABLE");
+    }
+
     private ResvServiceImpl service(ResvRepository repository, Clock clock) {
         return new ResvServiceImpl(mock(EntityManager.class), repository, mock(ResvRoomUnitRepository.class), clock);
     }

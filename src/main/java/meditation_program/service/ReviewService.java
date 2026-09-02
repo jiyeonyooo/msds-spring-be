@@ -58,4 +58,10 @@ public class ReviewService {
         }
         reviewRepository.delete(review);
     }
+
+    public List<ReviewResponse> getMyReviews(String email) {
+        return reviewRepository.findByProgramReservation_User_Email(email).stream()
+                .map(ReviewResponse::from)
+                .toList();
+    }
 }

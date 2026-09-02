@@ -79,4 +79,8 @@ public class Program {
         this.remain = capacity - reserved;
         this.status = this.remain == 0 ? ProgramStatus.CLOSED : ProgramStatus.OPEN;
     }
+
+    public void softDelete() {
+        this.status = ProgramStatus.DELETED;
+    }
 }

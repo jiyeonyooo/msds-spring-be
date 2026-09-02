@@ -1,5 +1,3 @@
 package meditation_program.entity;
 
-public enum ProgramStatus {
-    OPEN, CLOSED
-}
+public enum ProgramStatus { OPEN, CLOSED, DELETED }

@@ -8,6 +8,7 @@ public enum ResvErrorCode {
     RESV_NOT_FOUND(HttpStatus.NOT_FOUND, "예약 정보를 찾을 수 없습니다."),
     RESV_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 예약에 접근할 권한이 없습니다."),
     RESV_CANNOT_CANCEL(HttpStatus.CONFLICT, "취소할 수 없는 예약입니다."),
+    RESV_CANNOT_RESTORE(HttpStatus.CONFLICT, "현재 상태에서는 예약을 복구할 수 없습니다."),
     AUTH_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
     AUTH_FORBIDDEN(HttpStatus.FORBIDDEN, "관리자 권한이 필요합니다.");
 

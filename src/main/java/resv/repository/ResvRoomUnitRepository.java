@@ -66,4 +66,24 @@ public interface ResvRoomUnitRepository extends JpaRepository<RoomUnit, Long> {
             @Param("checkOutDate") LocalDate checkOutDate,
             @Param("roomUnitStatus") RoomUnitStatus roomUnitStatus,
             @Param("resvStatus") ResvStatus resvStatus);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select roomUnit from RoomUnit roomUnit
+            where roomUnit.id = :roomUnitId
+              and roomUnit.status = :roomUnitStatus
+              and not exists (
+                  select resv from Resv resv
+                  where resv.roomUnitsId = roomUnit.id
+                    and resv.resvStatus = :resvStatus
+                    and resv.checkInDate < :checkOutDate
+                    and resv.checkOutDate > :checkInDate
+              )
+            """)
+    java.util.Optional<RoomUnit> findAvailableByIdForUpdate(
+            @Param("roomUnitId") Long roomUnitId,
+            @Param("checkInDate") LocalDate checkInDate,
+            @Param("checkOutDate") LocalDate checkOutDate,
+            @Param("roomUnitStatus") RoomUnitStatus roomUnitStatus,
+            @Param("resvStatus") ResvStatus resvStatus);
 }
