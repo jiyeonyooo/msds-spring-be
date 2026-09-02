@@ -64,6 +64,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/wellness/questions", "/api/wellness/guest/**").permitAll()
                         .requestMatchers("/api/rooms", "/api/rooms/**", "/api/facilities", "/api/facilities/**").permitAll()
                         .requestMatchers("/api/quietness/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/quietness/guesthouses/*/summary",
+                                "/api/quietness/guesthouses/*/spaces",
+                                "/api/quietness/guesthouses/*/spaces/*",
+                                "/api/quietness/guesthouses/*/spaces/*/hourly",
+                                "/api/quietness/spaces/*/history"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/resv").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
