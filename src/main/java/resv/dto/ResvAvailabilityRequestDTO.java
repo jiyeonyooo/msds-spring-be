@@ -22,12 +22,24 @@ public class ResvAvailabilityRequestDTO {
     @BindParam("check_in_date")
     private LocalDate checkInDate;
 
+    public void setCheck_in_date(LocalDate checkInDate) {
+        this.checkInDate = checkInDate;
+    }
+
     @NotNull(message = "체크아웃 날짜는 필수입니다.")
     @BindParam("check_out_date")
     private LocalDate checkOutDate;
+
+    public void setCheck_out_date(LocalDate checkOutDate) {
+        this.checkOutDate = checkOutDate;
+    }
 
     @NotNull(message = "숙박 인원은 필수입니다.")
     @Min(value = 1, message = "숙박 인원은 1명 이상이어야 합니다.")
     @BindParam("guest_count")
     private Integer guestCount;
+
+    public void setGuest_count(Integer guestCount) {
+        this.guestCount = guestCount;
+    }
 }
