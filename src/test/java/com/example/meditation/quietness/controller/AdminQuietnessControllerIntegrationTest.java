@@ -110,6 +110,44 @@ class AdminQuietnessControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void 관리자는_조용함_기준값을_조회하고_빈틈없이_수정할_수_있다() throws Exception {
+        String adminToken = token("admin@example.com", "ADMIN");
+
+        mockMvc.perform(post("/api/admin/quietness/spaces")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"guesthouseId\":1,\"name\":\"기준값 테스트 공간\",\"type\":\"OTHER\"}"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/admin/quietness/guesthouses/1/thresholds")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(5))
+                .andExpect(jsonPath("$.data[0].level").value("VERY_QUIET"))
+                .andExpect(jsonPath("$.data[4].level").value("VERY_LOUD"));
+
+        mockMvc.perform(patch("/api/admin/quietness/guesthouses/1/thresholds")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"veryQuietMax\":25.00,\"quietMax\":35.00,"
+                                + "\"normalMax\":50.00,\"loudMax\":65.00}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].maxDecibel").value(25.0))
+                .andExpect(jsonPath("$.data[1].minDecibel").value(25.01))
+                .andExpect(jsonPath("$.data[4].minDecibel").value(65.01));
+    }
+
+    @Test
+    void 역전된_조용함_기준값은_거부한다() throws Exception {
+        mockMvc.perform(patch("/api/admin/quietness/guesthouses/1/thresholds")
+                        .header("Authorization", "Bearer " + token("admin@example.com", "ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"veryQuietMax\":40.00,\"quietMax\":35.00,"
+                                + "\"normalMax\":50.00,\"loudMax\":65.00}"))
+                .andExpect(status().isBadRequest());
+    }
+
     private String token(String email, String role) {
         return jwtTokenProvider.createToken(email, role);
     }

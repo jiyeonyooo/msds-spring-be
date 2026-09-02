@@ -32,6 +32,21 @@ public class FacilityService {
                 .toList();
     }
 
+    public List<FacilityDetailResponse> getFacilitiesForAdmin() {
+        return facilityRepository.findAll().stream()
+                .map(this::toDetailResponse)
+                .toList();
+    }
+
+    public FacilityDetailResponse getFacility(Long facilityId) {
+        Facility facility = facilityRepository.findById(facilityId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Facility not found: " + facilityId
+                ));
+        return toDetailResponse(facility);
+    }
+
     @Transactional
     public FacilityDetailResponse createFacility(FacilityCreateRequest request) {
         if (facilityRepository.existsByName(request.name())) {

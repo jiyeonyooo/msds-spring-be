@@ -1,7 +1,11 @@
 package member.user.repository;
 
 import member.user.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 /**
@@ -15,4 +19,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 회원가입 시 이메일 중복 여부 확인용.
     boolean existsByEmail(String email);
+
+    long countByRole(String role);
+
+    @Query("""
+            SELECT u
+            FROM User u
+            WHERE (:role IS NULL OR u.role = :role)
+              AND (
+                    :keyword IS NULL
+                    OR LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR u.phoneNumber LIKE CONCAT('%', :keyword, '%')
+              )
+            ORDER BY u.createdAt DESC
+            """)
+    Page<User> searchForAdmin(
+            @Param("keyword") String keyword,
+            @Param("role") String role,
+            Pageable pageable
+    );
 }

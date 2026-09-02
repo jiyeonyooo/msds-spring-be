@@ -4,9 +4,11 @@ import com.example.meditation.quietness.dto.request.NoiseDeviceCreateRequest;
 import com.example.meditation.quietness.dto.request.NoiseDeviceStatusUpdateRequest;
 import com.example.meditation.quietness.dto.request.NoiseMeasurementCreateRequest;
 import com.example.meditation.quietness.dto.request.QuietSpaceCreateRequest;
+import com.example.meditation.quietness.dto.request.QuietnessThresholdUpdateRequest;
 import com.example.meditation.quietness.dto.response.NoiseDeviceResponse;
 import com.example.meditation.quietness.dto.response.NoiseMeasurementResponse;
 import com.example.meditation.quietness.dto.response.QuietSpaceResponse;
+import com.example.meditation.quietness.dto.response.QuietnessThresholdResponse;
 import com.example.meditation.quietness.service.QuietnessAdminService;
 import global.dto.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -51,6 +53,27 @@ public class AdminQuietnessController {
         return ApiResponse.success(
                 "소음 측정기기 목록을 조회했습니다.",
                 quietnessAdminService.getDevices(guesthouseId)
+        );
+    }
+
+    @GetMapping("/guesthouses/{guesthouseId}/thresholds")
+    public ApiResponse<List<QuietnessThresholdResponse>> getThresholds(
+            @PathVariable Long guesthouseId
+    ) {
+        return ApiResponse.success(
+                "조용함 기준값을 조회했습니다.",
+                quietnessAdminService.getThresholds(guesthouseId)
+        );
+    }
+
+    @PatchMapping("/guesthouses/{guesthouseId}/thresholds")
+    public ApiResponse<List<QuietnessThresholdResponse>> updateThresholds(
+            @PathVariable Long guesthouseId,
+            @Valid @RequestBody QuietnessThresholdUpdateRequest request
+    ) {
+        return ApiResponse.success(
+                "조용함 기준값을 변경했습니다.",
+                quietnessAdminService.updateThresholds(guesthouseId, request)
         );
     }
 

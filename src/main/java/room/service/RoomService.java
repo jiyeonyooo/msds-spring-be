@@ -6,6 +6,8 @@ import room.dto.response.EquipmentResponse;
 import room.dto.response.RoomDetailResponse;
 import room.dto.response.RoomSpecsResponse;
 import room.dto.response.RoomSummaryResponse;
+import room.dto.response.RoomImageResponse;
+import room.dto.type.RoomImageType;
 import room.dto.request.RoomCreateRequest;
 import room.dto.request.RoomUpdateRequest;
 import room.entity.Room;
@@ -43,6 +45,12 @@ public class RoomService {
         return toDetailResponse(room);
     }
 
+    public List<RoomDetailResponse> getRoomsForAdmin() {
+        return roomRepository.findAll().stream()
+                .map(this::toDetailResponse)
+                .toList();
+    }
+
     @Transactional
     public RoomDetailResponse createRoom(RoomCreateRequest request) {
         Room room = Room.create(
@@ -53,7 +61,10 @@ public class RoomService {
                 request.minGuest(),
                 request.maxGuest(),
                 request.area(),
-                request.basePrice()
+                request.basePrice(),
+                request.mainImageUrl(),
+                request.bedType(),
+                request.bedCount()
         );
 
         return toDetailResponse(roomRepository.save(room));
@@ -84,7 +95,10 @@ public class RoomService {
                 request.minGuest(),
                 request.maxGuest(),
                 request.area(),
-                request.basePrice()
+                request.basePrice(),
+                request.mainImageUrl(),
+                request.bedType(),
+                request.bedCount()
         );
 
         return toDetailResponse(room);
@@ -122,9 +136,21 @@ public class RoomService {
                 new CapacityResponse(room.getStandardGuests(), room.getMaxGuests()),
                 new RoomSpecsResponse(room.getAreaM2(), room.getBedType(), room.getBedCount(), null),
                 room.getBasePrice(),
-                List.of(),
+                toImages(room),
                 toEquipmentGroups(room.getEquipmentMappings())
         );
+    }
+
+    private List<RoomImageResponse> toImages(Room room) {
+        if (room.getMainImageUrl() == null || room.getMainImageUrl().isBlank()) {
+            return List.of();
+        }
+        return List.of(new RoomImageResponse(
+                null,
+                room.getMainImageUrl(),
+                RoomImageType.MAIN,
+                0
+        ));
     }
 
     private List<EquipmentGroupResponse> toEquipmentGroups(

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import room.entity.enums.RoomStatus;
 import room.entity.enums.RoomType;
+import room.entity.enums.BedType;
 
 import java.math.BigDecimal;
 
@@ -39,7 +40,15 @@ public record RoomCreateRequest(
 
         @NotNull(message = "1박 기본 가격은 필수입니다.")
         @Min(value = 0, message = "1박 기본 가격은 0원 이상이어야 합니다.")
-        Integer basePrice
+        Integer basePrice,
+
+        @Size(max = 512, message = "대표 이미지 URL은 512자 이하여야 합니다.")
+        String mainImageUrl,
+
+        BedType bedType,
+
+        @Min(value = 1, message = "침대 수는 1개 이상이어야 합니다.")
+        Integer bedCount
 ) {
 
     @AssertTrue(message = "최대 숙박 인원은 최소 숙박 인원 이상이어야 합니다.")

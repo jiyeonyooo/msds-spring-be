@@ -57,13 +57,19 @@ public class WellnessCheck {
 
     public WellnessCheck(Long memberId, Long reservationId, WellnessSurvey survey,
                          StayStage stayStage, Integer totalScore, WellnessLevel resultLevel) {
+        this(memberId, reservationId, survey, stayStage, totalScore, resultLevel, LocalDateTime.now());
+    }
+
+    public WellnessCheck(Long memberId, Long reservationId, WellnessSurvey survey,
+                         StayStage stayStage, Integer totalScore, WellnessLevel resultLevel,
+                         LocalDateTime checkedAt) {
         this.memberId = memberId;
         this.reservationId = reservationId;
         this.survey = survey;
         this.stayStage = stayStage;
         this.totalScore = totalScore;
         this.resultLevel = resultLevel;
-        this.checkedAt = LocalDateTime.now();
+        this.checkedAt = checkedAt;
     }
 
     @PrePersist

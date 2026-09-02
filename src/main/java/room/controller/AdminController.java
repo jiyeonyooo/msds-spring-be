@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,8 @@ import room.dto.response.RoomDetailResponse;
 import room.service.FacilityService;
 import room.service.RoomService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -27,6 +30,24 @@ public class AdminController {
 
     private final RoomService roomService;
     private final FacilityService facilityService;
+
+    @GetMapping("/rooms")
+    public ResponseEntity<ApiResponse<List<RoomDetailResponse>>> getRooms() {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "관리자 객실 목록 조회에 성공했습니다.",
+                roomService.getRoomsForAdmin()
+        );
+    }
+
+    @GetMapping("/rooms/{roomId}")
+    public ResponseEntity<ApiResponse<RoomDetailResponse>> getRoom(@PathVariable Long roomId) {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "관리자 객실 상세 조회에 성공했습니다.",
+                roomService.getRoom(roomId)
+        );
+    }
 
     @PostMapping("/rooms")
     public ResponseEntity<ApiResponse<RoomDetailResponse>> createRoom(
@@ -59,6 +80,26 @@ public class AdminController {
                 HttpStatus.CREATED,
                 "편의시설 등록에 성공했습니다.",
                 facilityService.createFacility(request)
+        );
+    }
+
+    @GetMapping("/facilities")
+    public ResponseEntity<ApiResponse<List<FacilityDetailResponse>>> getFacilities() {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "관리자 편의시설 목록 조회에 성공했습니다.",
+                facilityService.getFacilitiesForAdmin()
+        );
+    }
+
+    @GetMapping("/facilities/{facilityId}")
+    public ResponseEntity<ApiResponse<FacilityDetailResponse>> getFacility(
+            @PathVariable Long facilityId
+    ) {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "관리자 편의시설 상세 조회에 성공했습니다.",
+                facilityService.getFacility(facilityId)
         );
     }
 

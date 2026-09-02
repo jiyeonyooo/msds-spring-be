@@ -42,6 +42,34 @@ public class Room {
             BigDecimal areaM2,
             Integer basePrice
     ) {
+        return create(
+                name,
+                description,
+                roomType,
+                status,
+                standardGuests,
+                maxGuests,
+                areaM2,
+                basePrice,
+                null,
+                null,
+                null
+        );
+    }
+
+    public static Room create(
+            String name,
+            String description,
+            RoomType roomType,
+            RoomStatus status,
+            Integer standardGuests,
+            Integer maxGuests,
+            BigDecimal areaM2,
+            Integer basePrice,
+            String mainImageUrl,
+            BedType bedType,
+            Integer bedCount
+    ) {
         Room room = new Room();
         room.name = name;
         room.description = description;
@@ -51,6 +79,9 @@ public class Room {
         room.maxGuests = maxGuests;
         room.areaM2 = areaM2;
         room.basePrice = basePrice;
+        room.mainImageUrl = mainImageUrl;
+        room.bedType = bedType;
+        room.bedCount = bedCount;
         return room;
     }
 
@@ -116,6 +147,34 @@ public class Room {
             BigDecimal areaM2,
             Integer basePrice
     ) {
+        update(
+                name,
+                description,
+                roomType,
+                status,
+                standardGuests,
+                maxGuests,
+                areaM2,
+                basePrice,
+                null,
+                null,
+                null
+        );
+    }
+
+    public void update(
+            String name,
+            String description,
+            RoomType roomType,
+            RoomStatus status,
+            Integer standardGuests,
+            Integer maxGuests,
+            BigDecimal areaM2,
+            Integer basePrice,
+            String mainImageUrl,
+            BedType bedType,
+            Integer bedCount
+    ) {
         if (name != null) {
             this.name = name;
         }
@@ -139,6 +198,15 @@ public class Room {
         }
         if (basePrice != null) {
             this.basePrice = basePrice;
+        }
+        if (mainImageUrl != null) {
+            this.mainImageUrl = mainImageUrl;
+        }
+        if (bedType != null) {
+            this.bedType = bedType;
+        }
+        if (bedCount != null) {
+            this.bedCount = bedCount;
         }
     }
 
