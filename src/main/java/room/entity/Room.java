@@ -3,6 +3,7 @@ package room.entity;
 import room.entity.enums.BedType;
 import room.entity.enums.RoomStatus;
 import room.entity.enums.RoomType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -128,7 +129,7 @@ public class Room {
     @OneToMany(mappedBy = "room")
     private List<RoomUnit> roomUnits = new ArrayList<>();
 
-    @OneToMany(mappedBy = "room")
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomEquipmentMapping> equipmentMappings = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -208,6 +209,11 @@ public class Room {
         if (bedCount != null) {
             this.bedCount = bedCount;
         }
+    }
+
+    public void replaceEquipmentMappings(List<RoomEquipmentMapping> mappings) {
+        equipmentMappings.clear();
+        equipmentMappings.addAll(mappings);
     }
 
     @PrePersist

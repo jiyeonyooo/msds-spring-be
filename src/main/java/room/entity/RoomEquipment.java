@@ -30,6 +30,21 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RoomEquipment {
 
+    public static RoomEquipment create(
+            String name,
+            EquipmentCategory category,
+            String description,
+            String iconUrl
+    ) {
+        RoomEquipment equipment = new RoomEquipment();
+        equipment.name = name;
+        equipment.category = category;
+        equipment.description = description;
+        equipment.iconUrl = iconUrl;
+        equipment.active = true;
+        return equipment;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

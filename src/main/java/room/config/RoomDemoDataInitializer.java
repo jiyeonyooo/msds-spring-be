@@ -8,13 +8,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import room.entity.Facility;
 import room.entity.Room;
+import room.entity.RoomEquipment;
 import room.entity.RoomUnit;
+import room.entity.enums.EquipmentCategory;
 import room.entity.enums.FacilityCategory;
 import room.entity.enums.RoomStatus;
 import room.entity.enums.RoomType;
 import room.entity.enums.RoomUnitStatus;
 import room.repository.FacilityRepository;
 import room.repository.RoomRepository;
+import room.repository.RoomEquipmentRepository;
 import room.repository.RoomUnitRepository;
 
 import java.math.BigDecimal;
@@ -31,6 +34,7 @@ public class RoomDemoDataInitializer implements ApplicationRunner {
     private final RoomRepository roomRepository;
     private final RoomUnitRepository roomUnitRepository;
     private final FacilityRepository facilityRepository;
+    private final RoomEquipmentRepository roomEquipmentRepository;
 
     @Override
     @Transactional
@@ -74,6 +78,7 @@ public class RoomDemoDataInitializer implements ApplicationRunner {
         createUnitIfMissing(still, "102", 1);
 
         createFacilitiesIfMissing();
+        createEquipmentsIfMissing();
     }
 
     private Room saveRoom(
@@ -127,6 +132,27 @@ public class RoomDemoDataInitializer implements ApplicationRunner {
         }
     }
 
+    private void createEquipmentsIfMissing() {
+        List<EquipmentSeed> seeds = List.of(
+                new EquipmentSeed("무선 인터넷", EquipmentCategory.CONVENIENCE, "객실 전용 Wi-Fi"),
+                new EquipmentSeed("냉난방기", EquipmentCategory.ELECTRONICS, "개별 온도 조절"),
+                new EquipmentSeed("호텔 침구", EquipmentCategory.BEDDING, "편안한 숙면을 위한 침구"),
+                new EquipmentSeed("차 세트", EquipmentCategory.KITCHEN, "차와 온수 포트"),
+                new EquipmentSeed("명상 쿠션", EquipmentCategory.WELLNESS, "객실 내 명상용 쿠션")
+        );
+
+        for (EquipmentSeed seed : seeds) {
+            if (!roomEquipmentRepository.existsByName(seed.name())) {
+                roomEquipmentRepository.save(RoomEquipment.create(
+                        seed.name(), seed.category(), seed.description(), null
+                ));
+            }
+        }
+    }
+
     private record FacilitySeed(String name, FacilityCategory category, String description) {
+    }
+
+    private record EquipmentSeed(String name, EquipmentCategory category, String description) {
     }
 }

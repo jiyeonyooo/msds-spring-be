@@ -13,8 +13,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import room.repository.RoomRepository;
+import room.repository.RoomEquipmentRepository;
+import room.entity.RoomEquipment;
+import room.entity.enums.EquipmentCategory;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,6 +43,9 @@ class AdminRoomControllerIntegrationTest {
 
     @Autowired
     private RoomRepository roomRepository;
+
+    @Autowired
+    private RoomEquipmentRepository roomEquipmentRepository;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -112,6 +119,50 @@ class AdminRoomControllerIntegrationTest {
         mockMvc.perform(get("/api/admin/rooms")
                         .header("Authorization", "Bearer " + token("member@example.com", "USER")))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void 관리자는_객실에_비품을_연결하고_공개_상세에서_확인할_수_있다() throws Exception {
+        String adminToken = token("admin@example.com", "ADMIN");
+        mockMvc.perform(post("/api/admin/rooms")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name":"비품 테스트 객실",
+                                  "description":"비품 연결 테스트용 객실",
+                                  "roomType":"STAY",
+                                  "status":"AVAILABLE",
+                                  "minGuest":1,
+                                  "maxGuest":2,
+                                  "area":24.0,
+                                  "basePrice":150000
+                                }
+                                """))
+                .andExpect(status().isCreated());
+        long roomId = roomRepository.findAll().get(0).getId();
+        RoomEquipment equipment = roomEquipmentRepository.save(RoomEquipment.create(
+                "명상 쿠션", EquipmentCategory.WELLNESS, "객실 명상용", null
+        ));
+
+        mockMvc.perform(get("/api/admin/room-equipments")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value("명상 쿠션"));
+
+        mockMvc.perform(patch("/api/admin/rooms/{roomId}/equipments", roomId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"equipments\":[{\"equipmentId\":" + equipment.getId()
+                                + ",\"quantity\":2,\"note\":\"창가 비치\"}]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.equipmentGroups[0].category").value("WELLNESS"))
+                .andExpect(jsonPath("$.data.equipmentGroups[0].equipments[0].quantity").value(2));
+
+        mockMvc.perform(get("/api/rooms/{roomId}", roomId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.equipmentGroups[0].equipments[0].note")
+                        .value("창가 비치"));
     }
 
     private String token(String email, String role) {

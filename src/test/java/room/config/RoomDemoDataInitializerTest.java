@@ -8,6 +8,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import room.repository.FacilityRepository;
 import room.repository.RoomRepository;
+import room.repository.RoomEquipmentRepository;
 import room.repository.RoomUnitRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,12 +26,16 @@ class RoomDemoDataInitializerTest {
     @Autowired
     private FacilityRepository facilityRepository;
 
+    @Autowired
+    private RoomEquipmentRepository roomEquipmentRepository;
+
     @Test
     void 객실과_실제_객실과_시설을_중복없이_생성한다() {
         RoomDemoDataInitializer initializer = new RoomDemoDataInitializer(
                 roomRepository,
                 roomUnitRepository,
-                facilityRepository
+                facilityRepository,
+                roomEquipmentRepository
         );
 
         initializer.run(new DefaultApplicationArguments());
@@ -41,5 +46,6 @@ class RoomDemoDataInitializerTest {
                 .containsExactlyInAnyOrder("Ocean Silence Suite", "Forest Twin", "Still Room");
         assertThat(roomUnitRepository.findAll()).hasSize(6);
         assertThat(facilityRepository.findAll()).hasSize(6);
+        assertThat(roomEquipmentRepository.findAll()).hasSize(5);
     }
 }

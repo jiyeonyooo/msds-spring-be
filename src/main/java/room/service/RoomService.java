@@ -7,14 +7,17 @@ import room.dto.response.RoomDetailResponse;
 import room.dto.response.RoomSpecsResponse;
 import room.dto.response.RoomSummaryResponse;
 import room.dto.response.RoomImageResponse;
+import room.dto.response.RoomEquipmentOptionResponse;
 import room.dto.type.RoomImageType;
 import room.dto.request.RoomCreateRequest;
+import room.dto.request.RoomEquipmentsUpdateRequest;
 import room.dto.request.RoomUpdateRequest;
 import room.entity.Room;
 import room.entity.RoomEquipment;
 import room.entity.RoomEquipmentMapping;
 import room.entity.enums.EquipmentCategory;
 import room.repository.RoomRepository;
+import room.repository.RoomEquipmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,9 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +39,7 @@ import java.util.Map;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final RoomEquipmentRepository roomEquipmentRepository;
 
     public List<RoomSummaryResponse> getRooms() {
         return roomRepository.findAll().stream()
@@ -48,6 +56,18 @@ public class RoomService {
     public List<RoomDetailResponse> getRoomsForAdmin() {
         return roomRepository.findAll().stream()
                 .map(this::toDetailResponse)
+                .toList();
+    }
+
+    public List<RoomEquipmentOptionResponse> getEquipmentOptions() {
+        return roomEquipmentRepository.findAllByActiveTrueOrderByCategoryAscNameAsc().stream()
+                .map(equipment -> new RoomEquipmentOptionResponse(
+                        equipment.getId(),
+                        equipment.getName(),
+                        equipment.getCategory(),
+                        equipment.getDescription(),
+                        equipment.getIconUrl()
+                ))
                 .toList();
     }
 
@@ -101,6 +121,39 @@ public class RoomService {
                 request.bedCount()
         );
 
+        return toDetailResponse(room);
+    }
+
+    @Transactional
+    public RoomDetailResponse updateRoomEquipments(
+            Long roomId,
+            RoomEquipmentsUpdateRequest request
+    ) {
+        Room room = findRoomDetail(roomId);
+        Set<Long> equipmentIds = request.equipments().stream()
+                .map(item -> item.equipmentId())
+                .collect(Collectors.toCollection(HashSet::new));
+        if (equipmentIds.size() != request.equipments().size()) {
+            throw new IllegalArgumentException("같은 비품을 중복해서 등록할 수 없습니다.");
+        }
+
+        Map<Long, RoomEquipment> equipments = roomEquipmentRepository.findAllById(equipmentIds)
+                .stream()
+                .filter(RoomEquipment::getActive)
+                .collect(Collectors.toMap(RoomEquipment::getId, Function.identity()));
+        if (equipments.size() != equipmentIds.size()) {
+            throw new IllegalArgumentException("존재하지 않거나 비활성화된 객실 비품이 포함되어 있습니다.");
+        }
+
+        List<RoomEquipmentMapping> mappings = request.equipments().stream()
+                .map(item -> RoomEquipmentMapping.create(
+                        room,
+                        equipments.get(item.equipmentId()),
+                        item.quantity(),
+                        item.note()
+                ))
+                .toList();
+        room.replaceEquipmentMappings(mappings);
         return toDetailResponse(room);
     }
 

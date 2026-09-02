@@ -11,6 +11,7 @@ import room.entity.enums.BedType;
 import room.entity.enums.RoomStatus;
 import room.entity.enums.RoomType;
 import room.repository.RoomRepository;
+import room.repository.RoomEquipmentRepository;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -23,7 +24,8 @@ import static org.mockito.Mockito.when;
 class RoomServiceTest {
 
     private final RoomRepository roomRepository = mock(RoomRepository.class);
-    private final RoomService service = new RoomService(roomRepository);
+    private final RoomEquipmentRepository roomEquipmentRepository = mock(RoomEquipmentRepository.class);
+    private final RoomService service = new RoomService(roomRepository, roomEquipmentRepository);
 
     @Test
     void 객실을_등록할_때_대표이미지와_침대정보를_저장한다() {

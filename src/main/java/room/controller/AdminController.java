@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import room.dto.request.RoomCreateRequest;
+import room.dto.request.RoomEquipmentsUpdateRequest;
 import room.dto.request.RoomUpdateRequest;
 import room.dto.request.FacilityCreateRequest;
 import room.dto.request.FacilityUpdateRequest;
 import room.dto.response.FacilityDetailResponse;
 import room.dto.response.RoomDetailResponse;
+import room.dto.response.RoomEquipmentOptionResponse;
 import room.service.FacilityService;
 import room.service.RoomService;
 
@@ -69,6 +71,27 @@ public class AdminController {
                 HttpStatus.OK,
                 "객실 정보 수정에 성공했습니다.",
                 roomService.updateRoom(roomId, request)
+        );
+    }
+
+    @GetMapping("/room-equipments")
+    public ResponseEntity<ApiResponse<List<RoomEquipmentOptionResponse>>> getRoomEquipments() {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "객실 비품 목록 조회에 성공했습니다.",
+                roomService.getEquipmentOptions()
+        );
+    }
+
+    @PatchMapping("/rooms/{roomId}/equipments")
+    public ResponseEntity<ApiResponse<RoomDetailResponse>> updateRoomEquipments(
+            @PathVariable Long roomId,
+            @Valid @RequestBody RoomEquipmentsUpdateRequest request
+    ) {
+        return ApiResponse.success(
+                HttpStatus.OK,
+                "객실 비품 수정에 성공했습니다.",
+                roomService.updateRoomEquipments(roomId, request)
         );
     }
 
