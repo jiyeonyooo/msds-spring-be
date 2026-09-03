@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProgramImageController {
 
-    private static final String UPLOAD_DIR = "uploads/program-images/";
+    private static final String UPLOAD_DIR = "uploads/program/";
 
     @PostMapping("/program/upload-image")
     public ResponseEntity<ApiResponse<String>> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
@@ -35,7 +35,7 @@ public class ProgramImageController {
         }
         file.transferTo(uploadPath.resolve(fileName));
 
-        String imageUrl = "http://localhost:8080/images/" + fileName;
+        String imageUrl = "/uploads/program/" + fileName;
         return ApiResponse.success(HttpStatus.CREATED, "이미지가 업로드되었습니다.", imageUrl);
     }
 
