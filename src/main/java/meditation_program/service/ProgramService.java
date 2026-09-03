@@ -10,11 +10,13 @@ import meditation_program.dto.ProgramReservationResponse;
 import meditation_program.dto.ProgramResponse;
 import meditation_program.dto.ProgramUpdateRequest;
 import meditation_program.dto.ReservationRequest;
+import meditation_program.dto.ReservationResponse;
 import meditation_program.entity.Program;
 import meditation_program.entity.ProgramReservation;
 import meditation_program.entity.ProgramStatus;
 import meditation_program.repository.ProgramRepository;
 import meditation_program.repository.ProgramReservationRepository;
+import meditation_program.repository.ReviewRepository;
 import member.user.domain.User;
 import member.user.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -32,6 +34,7 @@ public class ProgramService {
     private final ProgramRepository programRepository;
     private final ProgramReservationRepository reservationRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     public List<ProgramResponse> getPrograms() {
         return programRepository.findByStatusNot(ProgramStatus.DELETED).stream()
@@ -45,11 +48,7 @@ public class ProgramService {
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
     }
 
-    public List<ProgramReservationResponse> getMyReservations(String userEmail) {
-        return reservationRepository.findAllByUserEmail(userEmail).stream()
-                .map(ProgramReservationResponse::from)
-                .toList();
-    }
+
 
     public List<ProgramApplicationResponse> getApplications(Long programId) {
         if (!programRepository.existsById(programId)) {
@@ -112,5 +111,12 @@ public class ProgramService {
             throw new IllegalStateException("신청 내역이 있는 프로그램은 삭제할 수 없습니다.");
         }
         program.softDelete();
+    }
+
+
+    public List<ReservationResponse> getMyReservations(String email) {
+        return reservationRepository.findByUser_Email(email).stream()
+                .map(r -> ReservationResponse.from(r, reviewRepository.existsByProgramReservationId(r.getId())))
+                .toList();
     }
 }
