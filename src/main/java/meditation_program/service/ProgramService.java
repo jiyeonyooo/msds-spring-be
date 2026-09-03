@@ -14,6 +14,7 @@ import meditation_program.dto.ReservationResponse;
 import meditation_program.entity.Program;
 import meditation_program.entity.ProgramReservation;
 import meditation_program.entity.ProgramStatus;
+import meditation_program.entity.ReservationStatus;
 import meditation_program.repository.ProgramRepository;
 import meditation_program.repository.ProgramReservationRepository;
 import meditation_program.repository.ReviewRepository;
@@ -65,6 +66,14 @@ public class ProgramService {
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
+
+        if (reservationRepository.existsByProgramIdAndUserIdAndStatus(
+                request.programId(),
+                user.getId(),
+                ReservationStatus.RESERVED
+        )) {
+            throw new IllegalStateException("이미 신청한 프로그램입니다.");
+        }
 
         program.reserve(request.quantity());
 
