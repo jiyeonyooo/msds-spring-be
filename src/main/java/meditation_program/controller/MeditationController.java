@@ -82,4 +82,14 @@ public class MeditationController {
         programService.deleteProgram(programId);
         return ApiResponse.success(HttpStatus.OK, "삭제되었습니다.", null);
     }
+
+    @GetMapping("/program/reservations")
+    public ResponseEntity<ApiResponse<List<ProgramReservationResponse>>> myProgramReservations(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ApiResponse.success("조회되었습니다.", programService.getMyProgramReservations(userDetails.getUsername())));
+    }
+
+    @GetMapping("/program/detail/{programId}")
+    public ResponseEntity<ApiResponse<ProgramResponse>> programDetail(@PathVariable Long programId) {
+        return ResponseEntity.ok(ApiResponse.success("조회되었습니다.", programService.getProgram(programId)));
+    }
 }

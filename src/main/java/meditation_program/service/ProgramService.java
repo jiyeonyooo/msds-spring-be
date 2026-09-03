@@ -119,4 +119,10 @@ public class ProgramService {
                 .map(r -> ReservationResponse.from(r, reviewRepository.existsByProgramReservationId(r.getId())))
                 .toList();
     }
+
+    public List<ProgramReservationResponse> getMyProgramReservations(String email) {
+        return reservationRepository.findByUser_Email(email).stream()
+                .map(ProgramReservationResponse::from)
+                .toList();
+    }
 }
