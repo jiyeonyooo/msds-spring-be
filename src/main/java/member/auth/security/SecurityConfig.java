@@ -85,8 +85,9 @@ public class SecurityConfig {
                                 "/api/meditation/program/detail/*",
                                 "/api/meditation/review"
                         ).permitAll()
+                        .requestMatchers("/images/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/meditation/admin/program/upload-image").hasRole("ADMIN")
                         .requestMatchers("/api/meditation/admin/**").hasRole("ADMIN")
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
