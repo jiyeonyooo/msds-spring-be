@@ -14,6 +14,7 @@ import meditation_program.dto.ReservationResponse;
 import meditation_program.entity.Program;
 import meditation_program.entity.ProgramReservation;
 import meditation_program.entity.ProgramStatus;
+import meditation_program.entity.ReservationStatus;
 import meditation_program.repository.ProgramRepository;
 import meditation_program.repository.ProgramReservationRepository;
 import meditation_program.repository.ReviewRepository;
@@ -59,20 +60,6 @@ public class ProgramService {
                 .toList();
     }
 
-    @Transactional
-    public Long reserve(String userEmail, ReservationRequest request) {
-        Program program = programRepository.findByIdForUpdate(request.programId())
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
-
-        program.reserve(request.quantity());
-
-        ProgramReservation reservation = ProgramReservation.builder()
-                .program(program).user(user).quantity(request.quantity())
-                .build();
-        return reservationRepository.save(reservation).getId();
-    }
 
     @Transactional
     public void cancelReservation(String userEmail, Long reservationId) {
@@ -124,5 +111,25 @@ public class ProgramService {
         return reservationRepository.findByUser_Email(email).stream()
                 .map(ProgramReservationResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public Long reserve(String email, ReservationRequest request) {
+        Program program = programRepository.findByIdForUpdate(request.programId())
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
+
+        if (reservationRepository.existsByProgram_IdAndUser_EmailAndStatus(
+                request.programId(), email, ReservationStatus.RESERVED)) {
+            throw new IllegalStateException("이미 예약한 프로그램입니다.");
+        }
+
+        program.reserve(request.quantity());
+
+        ProgramReservation reservation = ProgramReservation.builder()
+                .program(program).user(user).quantity(request.quantity())
+                .build();
+        return reservationRepository.save(reservation).getId();
     }
 }
