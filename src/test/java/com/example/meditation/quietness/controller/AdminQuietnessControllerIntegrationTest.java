@@ -89,6 +89,13 @@ class AdminQuietnessControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.decibel").value(34.5));
 
+        mockMvc.perform(post("/api/admin/quietness/measurements")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"deviceId\":" + deviceId + ",\"decibel\":34.5,"
+                                + "\"measuredAt\":\"2100-01-01T00:00:00\"}"))
+                .andExpect(status().isBadRequest());
+
         mockMvc.perform(get("/api/quietness/guesthouses/1/spaces"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].spaceId").value(spaceId))

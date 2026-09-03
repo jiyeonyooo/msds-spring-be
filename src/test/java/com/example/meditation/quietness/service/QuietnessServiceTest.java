@@ -23,6 +23,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +56,7 @@ class QuietnessServiceTest {
 
     @Test
     void 공간별_최신값의_평균으로_숙소_종합지수를_계산한다() {
-        when(measurementRepository.findLatestForEachSpaceByGuesthouseId(1L))
+        when(measurementRepository.findLatestForEachSpaceByGuesthouseId(eq(1L), any(LocalDateTime.class)))
                 .thenReturn(List.of(measurement(10L, "30.00"), measurement(20L, "50.00")));
 
         GuesthouseQuietnessSummaryResponse response = service.getGuesthouseSummary(1L);
@@ -66,7 +68,7 @@ class QuietnessServiceTest {
 
     @Test
     void 공간별_현재_조용함_목록을_반환한다() {
-        when(measurementRepository.findLatestForEachSpaceByGuesthouseId(1L))
+        when(measurementRepository.findLatestForEachSpaceByGuesthouseId(eq(1L), any(LocalDateTime.class)))
                 .thenReturn(List.of(measurement(10L, "30.00"), measurement(20L, "50.00")));
 
         List<SpaceQuietnessResponse> responses = service.getSpaces(1L);
@@ -80,7 +82,7 @@ class QuietnessServiceTest {
 
     @Test
     void 데시벨이_가장_낮은_공간을_추천한다() {
-        when(measurementRepository.findLatestForEachSpaceByGuesthouseId(1L))
+        when(measurementRepository.findLatestForEachSpaceByGuesthouseId(eq(1L), any(LocalDateTime.class)))
                 .thenReturn(List.of(measurement(10L, "30.00"), measurement(20L, "50.00")));
 
         QuietSpaceRecommendationResponse response = service.recommendQuietSpace(1L);
@@ -94,7 +96,8 @@ class QuietnessServiceTest {
 
     @Test
     void 측정값이_없는_숙소는_조회할_수_없다() {
-        when(measurementRepository.findLatestForEachSpaceByGuesthouseId(1L)).thenReturn(List.of());
+        when(measurementRepository.findLatestForEachSpaceByGuesthouseId(eq(1L), any(LocalDateTime.class)))
+                .thenReturn(List.of());
 
         assertThatThrownBy(() -> service.getGuesthouseSummary(1L))
                 .isInstanceOf(ResponseStatusException.class);
