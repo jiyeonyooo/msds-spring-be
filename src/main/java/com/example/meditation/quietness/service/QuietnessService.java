@@ -38,7 +38,11 @@ public class QuietnessService {
     private final QuietSpaceRepository spaceRepository;
 
     public SpaceQuietnessResponse getCurrentQuietness(Long guesthouseId, Long spaceId) {
-        NoiseMeasurement measurement = measurementRepository.findTopBySpaceIdOrderByMeasuredAtDesc(spaceId)
+        NoiseMeasurement measurement = measurementRepository
+                .findTopBySpaceIdAndMeasuredAtLessThanEqualOrderByMeasuredAtDesc(
+                        spaceId,
+                        LocalDateTime.now()
+                )
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "해당 공간의 소음 측정값이 없습니다."
@@ -207,7 +211,10 @@ public class QuietnessService {
 
     private List<NoiseMeasurement> latestMeasurements(Long guesthouseId) {
         List<NoiseMeasurement> measurements =
-                measurementRepository.findLatestForEachSpaceByGuesthouseId(guesthouseId);
+                measurementRepository.findLatestForEachSpaceByGuesthouseId(
+                        guesthouseId,
+                        LocalDateTime.now()
+                );
         if (measurements.isEmpty()) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,

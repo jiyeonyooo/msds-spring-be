@@ -31,12 +31,16 @@ class NoiseMeasurementRepositoryTest {
         measurementRepository.saveAll(List.of(
                 measurement(firstDevice, 10L, "45.00", baseTime),
                 measurement(firstDevice, 10L, "30.00", baseTime.plusMinutes(10)),
+                measurement(firstDevice, 10L, "10.00", baseTime.plusDays(1)),
                 measurement(secondDevice, 20L, "55.00", baseTime),
                 measurement(secondDevice, 20L, "50.00", baseTime.plusMinutes(10))
         ));
 
         List<NoiseMeasurement> measurements =
-                measurementRepository.findLatestForEachSpaceByGuesthouseId(1L);
+                measurementRepository.findLatestForEachSpaceByGuesthouseId(
+                        1L,
+                        baseTime.plusMinutes(30)
+                );
 
         assertThat(measurements).hasSize(2);
         assertThat(measurements).extracting(NoiseMeasurement::getSpaceId).containsExactly(10L, 20L);

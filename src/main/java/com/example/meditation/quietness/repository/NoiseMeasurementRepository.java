@@ -10,7 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface NoiseMeasurementRepository extends JpaRepository<NoiseMeasurement, Long> {
-    Optional<NoiseMeasurement> findTopBySpaceIdOrderByMeasuredAtDesc(Long spaceId);
+    Optional<NoiseMeasurement> findTopBySpaceIdAndMeasuredAtLessThanEqualOrderByMeasuredAtDesc(
+            Long spaceId,
+            LocalDateTime asOf
+    );
 
     List<NoiseMeasurement> findAllBySpaceIdAndMeasuredAtBetweenOrderByMeasuredAtAsc(
             Long spaceId,
@@ -29,15 +32,18 @@ public interface NoiseMeasurementRepository extends JpaRepository<NoiseMeasureme
             select measurement
             from NoiseMeasurement measurement
             where measurement.guesthouseId = :guesthouseId
+              and measurement.measuredAt <= :asOf
               and measurement.measuredAt = (
                   select max(candidate.measuredAt)
                   from NoiseMeasurement candidate
                   where candidate.guesthouseId = measurement.guesthouseId
                     and candidate.spaceId = measurement.spaceId
+                    and candidate.measuredAt <= :asOf
               )
             order by measurement.spaceId asc
             """)
     List<NoiseMeasurement> findLatestForEachSpaceByGuesthouseId(
-            @Param("guesthouseId") Long guesthouseId
+            @Param("guesthouseId") Long guesthouseId,
+            @Param("asOf") LocalDateTime asOf
     );
 }
