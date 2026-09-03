@@ -77,6 +77,25 @@ public class MeditationController {
         return ApiResponse.success(HttpStatus.CREATED, "프로그램이 생성되었습니다.", id);
     }
 
+    @GetMapping("/admin/program/{programId}/applications")
+    public ResponseEntity<ApiResponse<List<ProgramApplicationResponse>>> programApplications(
+            @PathVariable Long programId
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "신청자 목록을 조회했습니다.",
+                programService.getApplications(programId)
+        ));
+    }
+
+    @PatchMapping("/admin/program/{programId}")
+    public ResponseEntity<ApiResponse<Void>> updateProgram(
+            @PathVariable Long programId,
+            @RequestBody @Valid ProgramUpdateRequest request
+    ) {
+        programService.updateProgram(programId, request);
+        return ApiResponse.success(HttpStatus.OK, "프로그램이 수정되었습니다.", null);
+    }
+
     @DeleteMapping("/admin/program/{programId}")
     public ResponseEntity<ApiResponse<Void>> deleteProgram(@PathVariable Long programId) {
         programService.deleteProgram(programId);

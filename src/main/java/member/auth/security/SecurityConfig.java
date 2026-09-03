@@ -80,9 +80,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/resv").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/api/meditation/program", "/api/meditation/review").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/meditation/program",
+                                "/api/meditation/program/detail/*",
+                                "/api/meditation/review"
+                        ).permitAll()
                         .requestMatchers("/api/meditation/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/meditation/program", "/api/meditation/review").permitAll()
 
                         .anyRequest().authenticated()
                 )
