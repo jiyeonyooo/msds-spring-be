@@ -5,8 +5,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import room.dto.request.RoomCreateRequest;
 import room.dto.request.RoomEquipmentsUpdateRequest;
+import room.dto.request.RoomImageCreateRequest;
 import room.dto.request.RoomUpdateRequest;
 import room.dto.request.FacilityCreateRequest;
 import room.dto.request.FacilityUpdateRequest;
 import room.dto.response.FacilityDetailResponse;
 import room.dto.response.RoomDetailResponse;
 import room.dto.response.RoomEquipmentOptionResponse;
+import room.dto.response.RoomImageResponse;
 import room.service.FacilityService;
 import room.service.RoomService;
 
@@ -112,6 +114,18 @@ public class AdminController {
                 HttpStatus.OK,
                 "객실 비품 수정에 성공했습니다.",
                 roomService.updateRoomEquipments(roomId, request)
+        );
+    }
+
+    @PostMapping("/rooms/{roomId}/images")
+    public ResponseEntity<ApiResponse<List<RoomImageResponse>>> addRoomImages(
+            @PathVariable Long roomId,
+            @Valid @RequestBody List<@Valid RoomImageCreateRequest> requests
+    ) {
+        return ApiResponse.success(
+                HttpStatus.CREATED,
+                "Room images registered successfully.",
+                roomService.addRoomImages(roomId, requests)
         );
     }
 
