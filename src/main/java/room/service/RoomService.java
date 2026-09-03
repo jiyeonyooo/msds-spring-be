@@ -8,14 +8,16 @@ import room.dto.response.RoomSpecsResponse;
 import room.dto.response.RoomSummaryResponse;
 import room.dto.response.RoomImageResponse;
 import room.dto.response.RoomEquipmentOptionResponse;
-import room.dto.type.RoomImageType;
 import room.dto.request.RoomCreateRequest;
 import room.dto.request.RoomEquipmentsUpdateRequest;
 import room.dto.request.RoomUpdateRequest;
+import room.dto.request.RoomImageCreateRequest;
 import room.entity.Room;
+import room.entity.RoomImage;
 import room.entity.RoomEquipment;
 import room.entity.RoomEquipmentMapping;
 import room.entity.enums.EquipmentCategory;
+import room.entity.enums.RoomImageType;
 import room.repository.RoomRepository;
 import room.repository.RoomEquipmentRepository;
 import lombok.RequiredArgsConstructor;
@@ -157,6 +159,58 @@ public class RoomService {
         return toDetailResponse(room);
     }
 
+    @Transactional
+    public List<RoomImageResponse> addRoomImages(
+            Long roomId,
+            List<RoomImageCreateRequest> requests
+    ) {
+        Room room = findRoomDetail(roomId);
+
+        if (requests == null || requests.isEmpty()) {
+            throw new IllegalArgumentException("At least one room image is required.");
+        }
+        boolean hasPersistedMainImage = room.getImages().stream()
+                .anyMatch(image -> image.getImageType() == RoomImageType.MAIN);
+        boolean hasLegacyMainImage = !hasPersistedMainImage
+                && room.getMainImageUrl() != null
+                && !room.getMainImageUrl().isBlank();
+        int currentImageCount = room.getImages().size() + (hasLegacyMainImage ? 1 : 0);
+
+        if (currentImageCount + requests.size() > 10) {
+            throw new IllegalArgumentException("A room can have up to 10 images.");
+        }
+
+        long existingMainCount = room.getImages().stream()
+                .filter(image -> image.getImageType() == RoomImageType.MAIN)
+                .count();
+        if (hasLegacyMainImage) {
+            existingMainCount++;
+        }
+        long requestedMainCount = requests.stream()
+                .filter(request -> request.imageType() == RoomImageType.MAIN)
+                .count();
+        if (existingMainCount + requestedMainCount > 1) {
+            throw new IllegalArgumentException("A room can have only one main image.");
+        }
+
+        for (RoomImageCreateRequest request : requests) {
+            RoomImage image = RoomImage.create(
+                    room,
+                    request.imageUrl(),
+                    request.imageType(),
+                    request.sortOrder()
+            );
+            room.addImage(image);
+            if (request.imageType() == RoomImageType.MAIN) {
+                room.updateMainImageUrl(request.imageUrl());
+            }
+        }
+
+        roomRepository.saveAndFlush(room);
+
+        return toImages(room);
+    }
+
     private Room findRoomDetail(Long roomId) {
         return roomRepository.findDetailById(roomId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -195,15 +249,34 @@ public class RoomService {
     }
 
     private List<RoomImageResponse> toImages(Room room) {
-        if (room.getMainImageUrl() == null || room.getMainImageUrl().isBlank()) {
-            return List.of();
+        List<RoomImageResponse> images = new ArrayList<>();
+        boolean hasPersistedMainImage = room.getImages().stream()
+                .anyMatch(image -> image.getImageType() == RoomImageType.MAIN);
+
+        if (!hasPersistedMainImage
+                && room.getMainImageUrl() != null
+                && !room.getMainImageUrl().isBlank()) {
+            images.add(new RoomImageResponse(
+                    null,
+                    room.getMainImageUrl(),
+                    RoomImageType.MAIN,
+                    0
+            ));
         }
-        return List.of(new RoomImageResponse(
-                null,
-                room.getMainImageUrl(),
-                RoomImageType.MAIN,
-                0
-        ));
+
+        images.addAll(room.getImages().stream()
+                .map(this::toImageResponse)
+                .toList());
+        return List.copyOf(images);
+    }
+
+    private RoomImageResponse toImageResponse(RoomImage image) {
+        return new RoomImageResponse(
+                image.getId(),
+                image.getImageUrl(),
+                image.getImageType(),
+                image.getSortOrder()
+        );
     }
 
     private List<EquipmentGroupResponse> toEquipmentGroups(

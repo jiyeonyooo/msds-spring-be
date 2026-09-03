@@ -1,6 +1,6 @@
 package room.dto.response;
 
-import room.dto.type.RoomImageType;
+import room.entity.enums.RoomImageType;
 
 public record RoomImageResponse(
         Long imageId,
