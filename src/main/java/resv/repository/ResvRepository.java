@@ -24,12 +24,14 @@ public interface ResvRepository extends JpaRepository<Resv, Long> {
 
     Page<Resv> findByMemberId(Long memberId, Pageable pageable);
 
+    // 날짜 필터는 검색 기간에 완전히 포함된 예약이 아니라, 검색 기간과 하루라도 겹치는 예약을 모두 찾는다.
+    // 예약 기간은 체크인 포함 / 체크아웃 미포함(반열림 구간)이므로 경계에서만 맞닿는 예약은 겹치지 않는 것으로 본다.
     @Query("""
             select resv from Resv resv
             join User member on member.id = resv.memberId
             where (:resvStatus is null or resv.resvStatus = :resvStatus)
-              and (:searchFromDate is null or resv.checkInDate >= :searchFromDate)
-              and (:searchToDate is null or resv.checkOutDate <= :searchToDate)
+              and (:searchFromDate is null or resv.checkOutDate > :searchFromDate)
+              and (:searchToDate is null or resv.checkInDate < :searchToDate)
               and (:keyword is null or lower(resv.resvNumber) like lower(concat('%', :keyword, '%'))
                    or lower(member.name) like lower(concat('%', :keyword, '%')))
             """)
