@@ -120,9 +120,9 @@ public class ProgramService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
-        if (reservationRepository.existsByProgram_IdAndUser_EmailAndStatus(
-                request.programId(), email, ReservationStatus.RESERVED)) {
-            throw new IllegalStateException("이미 예약한 프로그램입니다.");
+        if (reservationRepository.existsByProgramIdAndUserIdAndStatus(
+                request.programId(), user.getId(), ReservationStatus.RESERVED)) {
+            throw new IllegalStateException("이미 신청한 프로그램입니다.");
         }
 
         program.reserve(request.quantity());

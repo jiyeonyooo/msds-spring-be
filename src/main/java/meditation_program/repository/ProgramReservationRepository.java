@@ -13,6 +13,11 @@ public interface ProgramReservationRepository extends JpaRepository<ProgramReser
     List<ProgramReservation> findByUser_Email(String email);
 
     boolean existsByProgramId(Long programId);
+    boolean existsByProgramIdAndUserIdAndStatus(
+            Long programId,
+            Long userId,
+            ReservationStatus status
+    );
 
     @Query("select r from ProgramReservation r join fetch r.program join fetch r.user " +
             "where r.program.id = :programId order by r.createdAt desc")
