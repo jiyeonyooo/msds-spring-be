@@ -101,6 +101,15 @@ macOS/Linux:
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
+인증 API를 Swagger UI에서 호출하려면 다음 순서로 진행합니다.
+
+1. `POST /api/auth/login`으로 로그인합니다.
+2. 응답의 `accessToken` 값을 복사합니다.
+3. 우측 상단 **Authorize**에서 `Bearer ` 접두사 없이 토큰 값만 입력합니다.
+
+자물쇠가 표시되지 않은 API는 토큰 없이 호출할 수 있으며, `관리자 -` 그룹은 `ADMIN` 권한의 토큰이 필요합니다.
+객실·편의시설 이미지 업로드는 `관리자 - 이미지` 그룹에서 `multipart/form-data` 파일 요청으로 직접 테스트할 수 있습니다.
+
 주요 API 그룹은 다음과 같습니다.
 
 | 경로 | 설명 | 기본 접근 권한 |

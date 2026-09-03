@@ -1,8 +1,14 @@
 package meditation_program.controller;
 
 import global.dto.response.ApiResponse;
+import global.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,12 +22,17 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/meditation/admin")
 @RequiredArgsConstructor
+@Tag(name = "관리자 - 명상 프로그램")
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class ProgramImageController {
 
     private static final String UPLOAD_DIR = "uploads/program/";
 
-    @PostMapping("/program/upload-image")
-    public ResponseEntity<ApiResponse<String>> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+    @PostMapping(value = "/program/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "명상 프로그램 이미지 업로드")
+    public ResponseEntity<ApiResponse<String>> uploadImage(
+            @Parameter(description = "업로드할 이미지 파일", required = true)
+            @RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("업로드할 파일이 없습니다.");
         }
