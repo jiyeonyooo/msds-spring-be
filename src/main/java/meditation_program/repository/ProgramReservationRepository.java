@@ -26,4 +26,6 @@ public interface ProgramReservationRepository extends JpaRepository<ProgramReser
     @Query("select r from ProgramReservation r join fetch r.program join fetch r.user " +
             "where lower(r.user.email) = lower(:email) order by r.createdAt desc")
     List<ProgramReservation> findAllByUserEmail(@Param("email") String email);
+
+    boolean existsByProgram_IdAndUser_EmailAndStatus(Long programId, String email, ReservationStatus status);
 }
