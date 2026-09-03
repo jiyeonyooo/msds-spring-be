@@ -3,6 +3,7 @@ package room.entity;
 import room.entity.enums.BedType;
 import room.entity.enums.RoomStatus;
 import room.entity.enums.RoomType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,6 +43,34 @@ public class Room {
             BigDecimal areaM2,
             Integer basePrice
     ) {
+        return create(
+                name,
+                description,
+                roomType,
+                status,
+                standardGuests,
+                maxGuests,
+                areaM2,
+                basePrice,
+                null,
+                null,
+                null
+        );
+    }
+
+    public static Room create(
+            String name,
+            String description,
+            RoomType roomType,
+            RoomStatus status,
+            Integer standardGuests,
+            Integer maxGuests,
+            BigDecimal areaM2,
+            Integer basePrice,
+            String mainImageUrl,
+            BedType bedType,
+            Integer bedCount
+    ) {
         Room room = new Room();
         room.name = name;
         room.description = description;
@@ -51,6 +80,9 @@ public class Room {
         room.maxGuests = maxGuests;
         room.areaM2 = areaM2;
         room.basePrice = basePrice;
+        room.mainImageUrl = mainImageUrl;
+        room.bedType = bedType;
+        room.bedCount = bedCount;
         return room;
     }
 
@@ -97,7 +129,7 @@ public class Room {
     @OneToMany(mappedBy = "room")
     private List<RoomUnit> roomUnits = new ArrayList<>();
 
-    @OneToMany(mappedBy = "room")
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomEquipmentMapping> equipmentMappings = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -115,6 +147,34 @@ public class Room {
             Integer maxGuests,
             BigDecimal areaM2,
             Integer basePrice
+    ) {
+        update(
+                name,
+                description,
+                roomType,
+                status,
+                standardGuests,
+                maxGuests,
+                areaM2,
+                basePrice,
+                null,
+                null,
+                null
+        );
+    }
+
+    public void update(
+            String name,
+            String description,
+            RoomType roomType,
+            RoomStatus status,
+            Integer standardGuests,
+            Integer maxGuests,
+            BigDecimal areaM2,
+            Integer basePrice,
+            String mainImageUrl,
+            BedType bedType,
+            Integer bedCount
     ) {
         if (name != null) {
             this.name = name;
@@ -140,6 +200,20 @@ public class Room {
         if (basePrice != null) {
             this.basePrice = basePrice;
         }
+        if (mainImageUrl != null) {
+            this.mainImageUrl = mainImageUrl;
+        }
+        if (bedType != null) {
+            this.bedType = bedType;
+        }
+        if (bedCount != null) {
+            this.bedCount = bedCount;
+        }
+    }
+
+    public void replaceEquipmentMappings(List<RoomEquipmentMapping> mappings) {
+        equipmentMappings.clear();
+        equipmentMappings.addAll(mappings);
     }
 
     @PrePersist

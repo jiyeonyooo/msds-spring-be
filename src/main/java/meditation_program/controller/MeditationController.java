@@ -41,6 +41,11 @@ public class MeditationController {
         return ApiResponse.success(HttpStatus.OK, "취소되었습니다.", null);
     }
 
+    @GetMapping("/program/reservations/me")
+    public ResponseEntity<ApiResponse<List<ReservationResponse>>> myReservations(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ApiResponse.success("조회되었습니다.", programService.getMyReservations(userDetails.getUsername())));
+    }
+
     @GetMapping("/review")
     public ResponseEntity<ApiResponse<List<ReviewResponse>>> reviewList() {
         return ResponseEntity.ok(ApiResponse.success("조회되었습니다.", reviewService.getReviews()));
@@ -76,10 +81,5 @@ public class MeditationController {
     public ResponseEntity<ApiResponse<Void>> deleteProgram(@PathVariable Long programId) {
         programService.deleteProgram(programId);
         return ApiResponse.success(HttpStatus.OK, "삭제되었습니다.", null);
-    }
-
-    @GetMapping("/program/reservations/me")
-    public ResponseEntity<ApiResponse<List<ReservationResponse>>> myReservations(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(ApiResponse.success("조회되었습니다.", programService.getMyReservations(userDetails.getUsername())));
     }
 }

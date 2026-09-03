@@ -185,6 +185,36 @@ class InquiryServiceImplTest {
     }
 
     @Test
+    @DisplayName("관리자는 다른 회원이 작성한 문의도 상세 조회할 수 있다")
+    void getInquiryDetailForAdmin_success() {
+        User admin = buildUser(1L, "admin@example.com", "ADMIN");
+        User writer = buildUser(2L, "user@example.com", "USER");
+        Inquiry inquiry = buildInquiry(10L, writer);
+
+        given(userRepository.findByEmail("admin@example.com")).willReturn(Optional.of(admin));
+        given(inquiryRepository.findByIdWithUser(10L)).willReturn(Optional.of(inquiry));
+
+        InquiryResponse response = inquiryService.getInquiryDetailForAdmin("admin@example.com", 10L);
+
+        assertThat(response.getInquiryId()).isEqualTo(10L);
+        assertThat(response.getAuthorEmail()).isEqualTo("user@example.com");
+    }
+
+    @Test
+    @DisplayName("일반 회원은 관리자용 문의 상세를 조회할 수 없다")
+    void getInquiryDetailForAdmin_fail_notAdmin() {
+        User normalUser = buildUser(1L, "user@example.com", "USER");
+        given(userRepository.findByEmail("user@example.com")).willReturn(Optional.of(normalUser));
+
+        assertThatThrownBy(() -> inquiryService.getInquiryDetailForAdmin("user@example.com", 10L))
+                .isInstanceOf(MemberException.class)
+                .extracting(e -> ((MemberException) e).getErrorCode())
+                .isEqualTo(MemberErrorCode.ADMIN_ONLY);
+
+        verify(inquiryRepository, never()).findByIdWithUser(org.mockito.ArgumentMatchers.anyLong());
+    }
+
+    @Test
     @DisplayName("관리자가 답변을 등록하면 상태가 ANSWERED로 바뀐다")
     void answerInquiry_success() {
         User admin = buildUser(1L, "admin@example.com", "ADMIN");

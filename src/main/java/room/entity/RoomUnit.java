@@ -34,6 +34,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RoomUnit {
 
+    public static RoomUnit create(
+            Room room,
+            String roomNumber,
+            Integer floor,
+            RoomUnitStatus status
+    ) {
+        RoomUnit unit = new RoomUnit();
+        unit.room = room;
+        unit.roomNumber = roomNumber;
+        unit.floor = floor;
+        unit.status = status;
+        return unit;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import meditation_program.dto.ProgramCreateRequest;
+import meditation_program.dto.ProgramApplicationResponse;
+import meditation_program.dto.ProgramReservationResponse;
 import meditation_program.dto.ProgramResponse;
+import meditation_program.dto.ProgramUpdateRequest;
 import meditation_program.dto.ReservationRequest;
 import meditation_program.dto.ReservationResponse;
 import meditation_program.entity.Program;
@@ -39,11 +42,28 @@ public class ProgramService {
                 .toList();
     }
 
+    public ProgramResponse getProgram(Long programId) {
+        return programRepository.findById(programId)
+                .map(ProgramResponse::from)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
+    }
+
+
+
+    public List<ProgramApplicationResponse> getApplications(Long programId) {
+        if (!programRepository.existsById(programId)) {
+            throw new NoSuchElementException("존재하지 않는 프로그램입니다.");
+        }
+        return reservationRepository.findApplicationsByProgramId(programId).stream()
+                .map(ProgramApplicationResponse::from)
+                .toList();
+    }
+
     @Transactional
-    public Long reserve(String email, ReservationRequest request) {
+    public Long reserve(String userEmail, ReservationRequest request) {
         Program program = programRepository.findByIdForUpdate(request.programId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
         program.reserve(request.quantity());
@@ -55,12 +75,10 @@ public class ProgramService {
     }
 
     @Transactional
-    public void cancelReservation(String email, Long reservationId) {
+    public void cancelReservation(String userEmail, Long reservationId) {
         ProgramReservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약입니다."));
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
-        if (!reservation.getUser().getId().equals(user.getId())) {
+        if (!reservation.getUser().getEmail().equalsIgnoreCase(userEmail)) {
             throw new AccessDeniedException("본인 예약만 취소할 수 있습니다.");
         }
         reservation.cancel();
@@ -79,11 +97,22 @@ public class ProgramService {
     }
 
     @Transactional
+    public void updateProgram(Long programId, ProgramUpdateRequest request) {
+        Program program = programRepository.findByIdForUpdate(programId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
+        program.updateInfo(request.name(), request.pictureUrl(), request.capacity());
+    }
+
+    @Transactional
     public void deleteProgram(Long programId) {
         Program program = programRepository.findById(programId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 프로그램입니다."));
+        if (reservationRepository.existsByProgramId(programId)) {
+            throw new IllegalStateException("신청 내역이 있는 프로그램은 삭제할 수 없습니다.");
+        }
         program.softDelete();
     }
+
 
     public List<ReservationResponse> getMyReservations(String email) {
         return reservationRepository.findByUser_Email(email).stream()

@@ -92,6 +92,15 @@ public class User {
     }
 
     /**
+     * 관리자에 의한 권한 변경 (USER <-> ADMIN).
+     * 호출 측(AdminUserService)에서 값 검증과 안전장치(본인 변경 금지 등)를 마친 뒤 호출한다.
+     * JPA 변경 감지로 트랜잭션 커밋 시 UPDATE가 반영된다.
+     */
+    public void changeRole(String role) {
+        this.role = role;
+    }
+
+    /**
      * 엔티티가 UPDATE되기 직전에 JPA가 자동 호출.
      * updatedAt을 현재 시각으로 갱신하여 마지막 수정 시각을 항상 최신 상태로 유지한다.
      */

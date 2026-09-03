@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/wellness/questions", "/api/wellness/guest/**").permitAll()
                         .requestMatchers("/api/rooms", "/api/rooms/**", "/api/facilities", "/api/facilities/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/resv").permitAll()
+                        .requestMatchers("/api/quietness/**").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/quietness/guesthouses/*/summary",
                                 "/api/quietness/guesthouses/*/spaces",
@@ -71,10 +71,13 @@ public class SecurityConfig {
                                 "/api/quietness/guesthouses/*/spaces/*/hourly",
                                 "/api/quietness/spaces/*/history"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/resv").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                         .requestMatchers(HttpMethod.GET, "/api/meditation/program", "/api/meditation/review").permitAll()
                         .requestMatchers("/api/meditation/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/meditation/program", "/api/meditation/review").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -85,8 +88,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "OPTIONS", "DELETE"));
+
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173"
+        ));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
+
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

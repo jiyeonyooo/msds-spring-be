@@ -72,6 +72,11 @@ public class QuietnessThreshold {
         return aboveMinimum && belowMaximum;
     }
 
+    public void updateRange(BigDecimal minDecibel, BigDecimal maxDecibel) {
+        this.minDecibel = minDecibel;
+        this.maxDecibel = maxDecibel;
+    }
+
     @PrePersist
     private void onCreate() {
         LocalDateTime now = LocalDateTime.now();
