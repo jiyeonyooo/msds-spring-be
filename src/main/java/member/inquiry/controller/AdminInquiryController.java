@@ -1,6 +1,11 @@
 package member.inquiry.controller;
 
 import global.dto.response.ApiResponse;
+import global.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import member.inquiry.domain.InquiryStatus;
@@ -23,6 +28,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/inquiries")
 @RequiredArgsConstructor
+@Tag(name = "관리자 - 문의")
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminInquiryController {
 
     private final InquiryService inquiryService;
@@ -33,9 +40,10 @@ public class AdminInquiryController {
      * 예) GET /api/admin/inquiries?status=WAITING
      */
     @GetMapping
+    @Operation(summary = "전체 문의 목록 조회", description = "답변 상태로 문의를 필터링할 수 있습니다.")
     public ResponseEntity<ApiResponse<List<InquiryResponse>>> getAllInquiries(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(required = false) InquiryStatus status) {
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(description = "답변 상태") @RequestParam(required = false) InquiryStatus status) {
 
         String adminEmail = userDetails.getUsername();
         List<InquiryResponse> responses = inquiryService.getAllInquiriesForAdmin(adminEmail, status);
@@ -44,8 +52,9 @@ public class AdminInquiryController {
 
     // 2. 문의 상세 조회 - GET /api/admin/inquiries/{inquiryId}
     @GetMapping("/{inquiryId}")
+    @Operation(summary = "문의 상세 조회")
     public ResponseEntity<ApiResponse<InquiryResponse>> getInquiryDetail(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long inquiryId) {
 
         String adminEmail = userDetails.getUsername();
@@ -55,8 +64,9 @@ public class AdminInquiryController {
 
     // 3. 문의 답변 등록 - PATCH /api/admin/inquiries/{inquiryId}/answer
     @PatchMapping("/{inquiryId}/answer")
+    @Operation(summary = "문의 답변 등록", description = "문의에 관리자 답변을 등록하고 상태를 답변 완료로 변경합니다.")
     public ResponseEntity<ApiResponse<InquiryResponse>> answerInquiry(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long inquiryId,
             @Valid @RequestBody InquiryAnswerRequest request) {
 

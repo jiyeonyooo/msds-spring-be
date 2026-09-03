@@ -1,6 +1,11 @@
 package member.inquiry.controller;
 
 import global.dto.response.ApiResponse;
+import global.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import member.inquiry.dto.InquiryCreateRequest;
@@ -22,14 +27,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/inquiries")
 @RequiredArgsConstructor
+@Tag(name = "문의")
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class InquiryController {
 
     private final InquiryService inquiryService;
 
     // 1. 문의 작성 - POST /api/inquiries
     @PostMapping
+    @Operation(summary = "문의 작성")
     public ResponseEntity<ApiResponse<InquiryResponse>> createInquiry(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody InquiryCreateRequest request) {
 
         String email = userDetails.getUsername();
@@ -41,8 +49,9 @@ public class InquiryController {
 
     // 2. 내 문의 목록 조회 - GET /api/inquiries
     @GetMapping
+    @Operation(summary = "내 문의 목록 조회")
     public ResponseEntity<ApiResponse<List<InquiryResponse>>> getMyInquiries(
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
 
         String email = userDetails.getUsername();
         List<InquiryResponse> responses = inquiryService.getMyInquiries(email);
@@ -51,8 +60,9 @@ public class InquiryController {
 
     // 3. 내 문의 상세 조회 - GET /api/inquiries/{inquiryId}
     @GetMapping("/{inquiryId}")
+    @Operation(summary = "내 문의 상세 조회", description = "현재 회원이 작성한 문의만 조회할 수 있습니다.")
     public ResponseEntity<ApiResponse<InquiryResponse>> getMyInquiryDetail(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long inquiryId) {
 
         String email = userDetails.getUsername();

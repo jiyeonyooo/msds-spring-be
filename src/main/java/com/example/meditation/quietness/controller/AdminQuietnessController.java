@@ -11,6 +11,10 @@ import com.example.meditation.quietness.dto.response.QuietSpaceResponse;
 import com.example.meditation.quietness.dto.response.QuietnessThresholdResponse;
 import com.example.meditation.quietness.service.QuietnessAdminService;
 import global.dto.response.ApiResponse;
+import global.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,11 +30,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/quietness")
 @RequiredArgsConstructor
+@Tag(name = "관리자 - 조용함")
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminQuietnessController {
 
     private final QuietnessAdminService quietnessAdminService;
 
     @GetMapping("/guesthouses/{guesthouseId}/spaces")
+    @Operation(summary = "조용함 측정 공간 목록 조회")
     public ApiResponse<List<QuietSpaceResponse>> getSpaces(@PathVariable Long guesthouseId) {
         return ApiResponse.success(
                 "조용함 측정 공간 목록을 조회했습니다.",
@@ -39,6 +46,7 @@ public class AdminQuietnessController {
     }
 
     @PostMapping("/spaces")
+    @Operation(summary = "조용함 측정 공간 등록")
     public ApiResponse<QuietSpaceResponse> createSpace(
             @Valid @RequestBody QuietSpaceCreateRequest request
     ) {
@@ -49,6 +57,7 @@ public class AdminQuietnessController {
     }
 
     @GetMapping("/guesthouses/{guesthouseId}/devices")
+    @Operation(summary = "소음 측정 기기 목록 조회")
     public ApiResponse<List<NoiseDeviceResponse>> getDevices(@PathVariable Long guesthouseId) {
         return ApiResponse.success(
                 "소음 측정기기 목록을 조회했습니다.",
@@ -57,6 +66,7 @@ public class AdminQuietnessController {
     }
 
     @GetMapping("/guesthouses/{guesthouseId}/thresholds")
+    @Operation(summary = "조용함 기준값 조회")
     public ApiResponse<List<QuietnessThresholdResponse>> getThresholds(
             @PathVariable Long guesthouseId
     ) {
@@ -67,6 +77,7 @@ public class AdminQuietnessController {
     }
 
     @PatchMapping("/guesthouses/{guesthouseId}/thresholds")
+    @Operation(summary = "조용함 기준값 변경")
     public ApiResponse<List<QuietnessThresholdResponse>> updateThresholds(
             @PathVariable Long guesthouseId,
             @Valid @RequestBody QuietnessThresholdUpdateRequest request
@@ -78,6 +89,7 @@ public class AdminQuietnessController {
     }
 
     @PostMapping("/devices")
+    @Operation(summary = "소음 측정 기기 등록")
     public ApiResponse<NoiseDeviceResponse> createDevice(
             @Valid @RequestBody NoiseDeviceCreateRequest request
     ) {
@@ -88,6 +100,7 @@ public class AdminQuietnessController {
     }
 
     @PatchMapping("/devices/{deviceId}/status")
+    @Operation(summary = "소음 측정 기기 상태 변경")
     public ApiResponse<NoiseDeviceResponse> updateDeviceStatus(
             @PathVariable Long deviceId,
             @Valid @RequestBody NoiseDeviceStatusUpdateRequest request
@@ -99,6 +112,7 @@ public class AdminQuietnessController {
     }
 
     @PostMapping("/measurements")
+    @Operation(summary = "소음 측정값 등록", description = "측정 기기가 수집한 데시벨 값을 저장합니다.")
     public ApiResponse<NoiseMeasurementResponse> createMeasurement(
             @Valid @RequestBody NoiseMeasurementCreateRequest request
     ) {

@@ -1,6 +1,11 @@
 package member.user.controller;
 
 import global.dto.response.ApiResponse;
+import global.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import member.user.dto.UserDeleteRequest;
@@ -23,6 +28,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Tag(name = "회원")
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class UserController {
 
     private final UserService userService;
@@ -32,8 +39,9 @@ public class UserController {
      * GET /api/users/me
      */
     @GetMapping("/me")
+    @Operation(summary = "내 정보 조회")
     public ResponseEntity<ApiResponse<UserResponse>> getMyInfo(
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
 
         String email = userDetails.getUsername();
         UserResponse response = userService.getMyProfile(email);
@@ -48,8 +56,9 @@ public class UserController {
      * @Valid를 통해 요청 필드(UserUpdateRequest)의 형식(전화번호 패턴 등)을 검증한다.
      */
     @PatchMapping("/me")
+    @Operation(summary = "내 정보 수정", description = "이름과 전화번호 등 입력한 필드만 수정합니다.")
     public ResponseEntity<ApiResponse<UserUpdateResponse>> updateMyInfo(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody UserUpdateRequest request) {
 
         String email = userDetails.getUsername();
@@ -65,8 +74,9 @@ public class UserController {
      * 삭제 성공 시 별도 응답 데이터 없이 안내 메시지만 반환한다.
      */
     @DeleteMapping("/me")
+    @Operation(summary = "회원 탈퇴", description = "비밀번호를 다시 확인한 뒤 현재 계정을 삭제합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteAccount(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody UserDeleteRequest request) {
 
         String email = userDetails.getUsername();

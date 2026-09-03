@@ -3,6 +3,11 @@ package com.example.meditation.wellness.controller;
 import com.example.meditation.wellness.dto.response.AdminWellnessStatisticsResponse;
 import com.example.meditation.wellness.service.WellnessAdminService;
 import global.dto.response.ApiResponse;
+import global.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -18,6 +23,8 @@ import java.time.temporal.ChronoUnit;
 @RestController
 @RequestMapping("/api/admin/wellness")
 @RequiredArgsConstructor
+@Tag(name = "관리자 - 마음 기록")
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminWellnessController {
 
     private static final long MAX_RANGE_DAYS = 365;
@@ -25,10 +32,11 @@ public class AdminWellnessController {
     private final WellnessAdminService wellnessAdminService;
 
     @GetMapping("/statistics")
+    @Operation(summary = "마음상태 통계 조회", description = "기간을 생략하면 최근 30일을 조회하며, 최대 조회 범위는 366일입니다.")
     public ApiResponse<AdminWellnessStatisticsResponse> getStatistics(
-            @RequestParam(required = false)
+            @Parameter(description = "조회 시작일", example = "2026-08-01") @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(required = false)
+            @Parameter(description = "조회 종료일", example = "2026-08-30") @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
     ) {
         LocalDate resolvedTo = toDate == null ? LocalDate.now() : toDate;

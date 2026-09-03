@@ -1,6 +1,10 @@
 package room.controller;
 
 import global.dto.response.ApiResponse;
+import global.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,12 +34,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@Tag(name = "관리자 - 객실·시설")
+@SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminController {
 
     private final RoomService roomService;
     private final FacilityService facilityService;
 
     @GetMapping("/rooms")
+    @Operation(summary = "객실 목록 조회")
     public ResponseEntity<ApiResponse<List<RoomDetailResponse>>> getRooms() {
         return ApiResponse.success(
                 HttpStatus.OK,
@@ -45,6 +52,7 @@ public class AdminController {
     }
 
     @GetMapping("/rooms/{roomId}")
+    @Operation(summary = "객실 상세 조회")
     public ResponseEntity<ApiResponse<RoomDetailResponse>> getRoom(@PathVariable Long roomId) {
         return ApiResponse.success(
                 HttpStatus.OK,
@@ -54,6 +62,7 @@ public class AdminController {
     }
 
     @GetMapping("/facilities")
+    @Operation(summary = "편의시설 목록 조회")
     public ResponseEntity<ApiResponse<List<FacilityDetailResponse>>> getFacilities() {
         return ApiResponse.success(
                 HttpStatus.OK,
@@ -63,6 +72,7 @@ public class AdminController {
     }
 
     @GetMapping("/facilities/{facilityId}")
+    @Operation(summary = "편의시설 상세 조회")
     public ResponseEntity<ApiResponse<FacilityDetailResponse>> getFacility(
             @PathVariable Long facilityId
     ) {
@@ -74,6 +84,7 @@ public class AdminController {
     }
 
     @PostMapping("/rooms")
+    @Operation(summary = "객실 등록")
     public ResponseEntity<ApiResponse<RoomDetailResponse>> createRoom(
             @Valid @RequestBody RoomCreateRequest request
     ) {
@@ -85,6 +96,7 @@ public class AdminController {
     }
 
     @PatchMapping("/rooms/{roomId}")
+    @Operation(summary = "객실 정보 수정")
     public ResponseEntity<ApiResponse<RoomDetailResponse>> updateRoom(
             @PathVariable Long roomId,
             @Valid @RequestBody RoomUpdateRequest request
@@ -97,6 +109,7 @@ public class AdminController {
     }
 
     @GetMapping("/room-equipments")
+    @Operation(summary = "객실 비품 선택지 조회")
     public ResponseEntity<ApiResponse<List<RoomEquipmentOptionResponse>>> getRoomEquipments() {
         return ApiResponse.success(
                 HttpStatus.OK,
@@ -106,6 +119,7 @@ public class AdminController {
     }
 
     @PatchMapping("/rooms/{roomId}/equipments")
+    @Operation(summary = "객실 비품 수정", description = "객실에 연결할 비품 목록을 교체합니다.")
     public ResponseEntity<ApiResponse<RoomDetailResponse>> updateRoomEquipments(
             @PathVariable Long roomId,
             @Valid @RequestBody RoomEquipmentsUpdateRequest request
@@ -118,6 +132,7 @@ public class AdminController {
     }
 
     @PostMapping("/rooms/{roomId}/images")
+    @Operation(summary = "객실 이미지 정보 등록", description = "이미지 업로드 API가 반환한 URL과 정렬 순서를 객실에 연결합니다.")
     public ResponseEntity<ApiResponse<List<RoomImageResponse>>> addRoomImages(
             @PathVariable Long roomId,
             @Valid @RequestBody List<@Valid RoomImageCreateRequest> requests
@@ -130,6 +145,7 @@ public class AdminController {
     }
 
     @PostMapping("/facilities")
+    @Operation(summary = "편의시설 등록")
     public ResponseEntity<ApiResponse<FacilityDetailResponse>> createFacility(
             @Valid @RequestBody FacilityCreateRequest request
     ) {
@@ -141,6 +157,7 @@ public class AdminController {
     }
 
     @PatchMapping("/facilities/{facilityId}")
+    @Operation(summary = "편의시설 정보 수정")
     public ResponseEntity<ApiResponse<FacilityDetailResponse>> updateFacility(
             @PathVariable Long facilityId,
             @Valid @RequestBody FacilityUpdateRequest request
