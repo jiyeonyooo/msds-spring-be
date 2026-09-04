@@ -17,13 +17,15 @@ public interface ResvRoomUnitRepository extends JpaRepository<RoomUnit, Long> {
     interface RoomAvailabilityProjection {
         Long getRoomId();
         String getRoomName();
+        String getMainImageUrl();
         Integer getMaxGuests();
         Integer getBasePrice();
         long getRemainingCount();
     }
 
     @Query("""
-            select room.id as roomId, room.name as roomName, room.maxGuests as maxGuests,
+            select room.id as roomId, room.name as roomName, room.mainImageUrl as mainImageUrl,
+                   room.maxGuests as maxGuests,
                    room.basePrice as basePrice, count(roomUnit) as remainingCount
             from Room room
             left join RoomUnit roomUnit on roomUnit.room = room
@@ -36,7 +38,7 @@ public interface ResvRoomUnitRepository extends JpaRepository<RoomUnit, Long> {
                       and resv.checkOutDate > :checkInDate
                 )
             where room.maxGuests >= :guestCount
-            group by room.id, room.name, room.maxGuests, room.basePrice
+            group by room.id, room.name, room.mainImageUrl, room.maxGuests, room.basePrice
             order by room.id asc
             """)
     List<RoomAvailabilityProjection> findAvailability(
