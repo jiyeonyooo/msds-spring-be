@@ -22,7 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/meditation")
 @RequiredArgsConstructor
-@Tag(name = "명상 프로그램")
+@Tag(name = "명상 프로그램", description = "명상 프로그램 조회, 신청, 취소, 후기와 관리자 기능을 제공합니다.")
 public class MeditationController {
 
     private final ProgramService programService;

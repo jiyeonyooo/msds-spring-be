@@ -28,7 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/wellness")
 @RequiredArgsConstructor
-@Tag(name = "마음 기록")
+@Tag(name = "마음 기록", description = "마음 상태 검사와 개인별 검사 기록 및 변화 추이를 제공합니다.")
 public class WellnessController {
 
     private final WellnessService wellnessService;

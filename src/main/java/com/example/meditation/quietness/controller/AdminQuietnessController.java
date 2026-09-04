@@ -30,7 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/quietness")
 @RequiredArgsConstructor
-@Tag(name = "관리자 - 조용함")
+@Tag(name = "관리자 - 조용함", description = "조용함 측정 공간, 측정 기기, 측정값 및 판정 기준을 관리합니다.")
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminQuietnessController {
 

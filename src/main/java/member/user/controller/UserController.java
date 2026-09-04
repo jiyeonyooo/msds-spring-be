@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@Tag(name = "회원")
+@Tag(name = "회원", description = "로그인 회원의 프로필 조회, 수정 및 회원 탈퇴를 처리합니다.")
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class UserController {
 

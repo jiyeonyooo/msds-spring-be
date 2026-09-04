@@ -22,7 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/meditation/admin")
 @RequiredArgsConstructor
-@Tag(name = "관리자 - 명상 프로그램")
+@Tag(name = "관리자 - 명상 프로그램", description = "명상 프로그램에 사용할 이미지를 업로드합니다.")
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class ProgramImageController {
 

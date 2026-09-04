@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/facilities")
 @RequiredArgsConstructor
-@Tag(name = "편의시설")
+@Tag(name = "편의시설", description = "고객에게 공개되는 편의시설 목록과 상세 정보를 조회합니다.")
 public class FacilityController {
 
     private final FacilityService facilityService;

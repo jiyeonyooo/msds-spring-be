@@ -21,7 +21,7 @@ import resv.service.ResvService;
 @RequestMapping("/api/admin/resv")
 @Validated
 @RequiredArgsConstructor
-@Tag(name = "관리자 - 예약")
+@Tag(name = "관리자 - 예약", description = "전체 예약 조회, 상세 조회, 취소 및 복구를 처리합니다.")
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminResvController {
     private final ResvService resvService;
