@@ -18,7 +18,8 @@ public record ResvAvailabilityResponseDTO(
                                                  List<ResvRoomUnitRepository.RoomAvailabilityProjection> rooms) {
         int nights = Math.toIntExact(ChronoUnit.DAYS.between(request.getCheckInDate(), request.getCheckOutDate()));
         return new ResvAvailabilityResponseDTO(request.getCheckInDate(), request.getCheckOutDate(), request.getGuestCount(), nights,
-                rooms.stream().map(room -> new RoomAvailabilityDTO(room.getRoomId(), room.getRoomName(), room.getMaxGuests(),
+                rooms.stream().map(room -> new RoomAvailabilityDTO(room.getRoomId(), room.getRoomName(),
+                        room.getMainImageUrl(), room.getMaxGuests(),
                         room.getRemainingCount(), room.getBasePrice(), Math.multiplyExact(room.getBasePrice(), nights),
                         room.getRemainingCount() > 0)).toList());
     }
@@ -26,6 +27,7 @@ public record ResvAvailabilityResponseDTO(
     public record RoomAvailabilityDTO(
             @JsonProperty("room_id") Long roomId,
             @JsonProperty("room_name") String roomName,
+            @JsonProperty("main_image_url") String mainImageUrl,
             @JsonProperty("max_guests") Integer maxGuests,
             @JsonProperty("remaining_count") long remainingCount,
             @JsonProperty("base_price") Integer basePrice,
