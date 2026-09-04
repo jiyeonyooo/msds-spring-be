@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/quietness")
 @RequiredArgsConstructor
-@Tag(name = "조용함")
+@Tag(name = "조용함", description = "숙소와 공간별 소음 측정값, 조용함 지수, 통계 및 추천을 조회합니다.")
 public class QuietnessController {
 
     private final QuietnessService quietnessService;

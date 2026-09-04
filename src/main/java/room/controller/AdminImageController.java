@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/admin/images")
 @RequiredArgsConstructor
-@Tag(name = "관리자 - 이미지")
+@Tag(name = "관리자 - 이미지", description = "객실과 편의시설에 사용할 이미지를 업로드합니다.")
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminImageController {
 

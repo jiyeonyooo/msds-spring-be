@@ -34,7 +34,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@Tag(name = "관리자 - 객실·시설")
+@Tag(name = "관리자 - 객실·시설", description = "객실, 호실, 비품과 편의시설 정보를 관리합니다.")
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminController {
 

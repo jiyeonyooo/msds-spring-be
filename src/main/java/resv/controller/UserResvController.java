@@ -22,7 +22,7 @@ import resv.service.ResvService;
 @RequestMapping("/api/resv")
 @Validated
 @RequiredArgsConstructor
-@Tag(name = "예약")
+@Tag(name = "예약", description = "예약 가능 객실 조회, 객실 예약과 회원의 예약 내역을 관리합니다.")
 public class UserResvController {
     private final ResvService resvService;
 

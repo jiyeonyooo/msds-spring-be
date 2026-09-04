@@ -23,7 +23,7 @@ import java.time.temporal.ChronoUnit;
 @RestController
 @RequestMapping("/api/admin/wellness")
 @RequiredArgsConstructor
-@Tag(name = "관리자 - 마음 기록")
+@Tag(name = "관리자 - 마음 기록", description = "관리자용 마음 상태 검사 통계와 집계 결과를 제공합니다.")
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminWellnessController {
 

@@ -27,7 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/inquiries")
 @RequiredArgsConstructor
-@Tag(name = "문의")
+@Tag(name = "문의", description = "로그인 회원의 1:1 문의 등록과 조회를 처리합니다.")
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class InquiryController {
 

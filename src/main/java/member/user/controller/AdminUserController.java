@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/admin/users")
 @Validated
 @RequiredArgsConstructor
-@Tag(name = "관리자 - 회원")
+@Tag(name = "관리자 - 회원", description = "회원 목록, 상세 정보, 활동 내역과 통계를 관리합니다.")
 @SecurityRequirement(name = OpenApiConfig.BEARER_AUTH)
 public class AdminUserController {
 

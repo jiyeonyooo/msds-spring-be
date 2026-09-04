@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "인증")
+@Tag(name = "인증", description = "회원가입, 로그인, 로그아웃과 JWT 인증을 처리합니다.")
 public class AuthController {
 
     private final AuthService authService;
